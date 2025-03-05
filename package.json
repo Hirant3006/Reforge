@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/Hirant3006/Reforge/issues"
   },
-  "homepage": "https://github.com/Hirant3006/Reforge#readme"
+  "homepage": "https://github.com/Hirant3006/Reforge#readme",
+  "dependencies": {
+    "mongoose": "^8.12.1"
+  },
+  "devDependencies": {
+    "netlify-cli": "^19.0.1"
+  }
 }
