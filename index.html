@@ -1,0 +1,234 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <title>Reforge Explorer</title>  
+  <script src="https://cdn.tailwindcss.com"></script>  
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>  
+  <link rel="stylesheet" href="css/style.css">  
+</head>  
+<body class="bg-gray-50">  
+  <div x-data="appData()" x-init="init()">  
+    <!-- Header -->  
+    <header class="bg-white shadow-sm">  
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">  
+        <div class="flex justify-between items-center py-4">  
+          <h1 class="text-xl font-bold text-gray-900">Reforge Explorer</h1>  
+          
+          <div class="flex space-x-4">  
+            <button   
+              @click="refreshData()"   
+              class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"  
+              :disabled="loading"  
+            >  
+              <svg x-show="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">  
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>  
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>  
+              </svg>  
+              Refresh Data  
+            </button>  
+          </div>  
+        </div>  
+      </div>  
+    </header>  
+
+    <!-- Main Content -->  
+    <main class="py-6">  
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">  
+        <!-- Loading State -->  
+        <div x-show="loading" class="text-center py-12">  
+          <svg class="animate-spin h-12 w-12 mx-auto text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">  
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>  
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>  
+          </svg>  
+          <p class="mt-4 text-lg text-gray-600">Loading data...</p>  
+        </div>  
+        
+        <!-- Data View -->  
+        <div x-show="!loading">  
+          <!-- Stats -->  
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">  
+            <div class="bg-white overflow-hidden shadow rounded-lg">  
+              <div class="px-4 py-5 sm:p-6">  
+                <div class="flex items-center">  
+                  <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">  
+                    <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />  
+                    </svg>  
+                  </div>  
+                  <div class="ml-5 w-0 flex-1">  
+                    <dt class="text-sm font-medium text-gray-500 truncate">Roadmaps</dt>  
+                    <dd class="flex items-baseline">  
+                      <div class="text-2xl font-semibold text-gray-900" x-text="stats.roadmaps"></div>  
+                    </dd>  
+                  </div>  
+                </div>  
+              </div>  
+            </div>  
+            
+            <div class="bg-white overflow-hidden shadow rounded-lg">  
+              <div class="px-4 py-5 sm:p-6">  
+                <div class="flex items-center">  
+                  <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">  
+                    <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />  
+                    </svg>  
+                  </div>  
+                  <div class="ml-5 w-0 flex-1">  
+                    <dt class="text-sm font-medium text-gray-500 truncate">Courses</dt>  
+                    <dd class="flex items-baseline">  
+                      <div class="text-2xl font-semibold text-gray-900" x-text="stats.courses"></div>  
+                    </dd>  
+                  </div>  
+                </div>  
+              </div>  
+            </div>  
+            
+            <div class="bg-white overflow-hidden shadow rounded-lg">  
+              <div class="px-4 py-5 sm:p-6">  
+                <div class="flex items-center">  
+                  <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">  
+                    <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />  
+                    </svg>  
+                  </div>  
+                  <div class="ml-5 w-0 flex-1">  
+                    <dt class="text-sm font-medium text-gray-500 truncate">Lessons</dt>  
+                    <dd class="flex items-baseline">  
+                      <div class="text-2xl font-semibold text-gray-900" x-text="stats.lessons"></div>  
+                    </dd>  
+                  </div>  
+                </div>  
+              </div>  
+            </div>  
+          </div>  
+          
+          <!-- Content Tabs -->  
+          <div class="mb-6">  
+            <div class="border-b border-gray-200">  
+              <nav class="-mb-px flex space-x-8" aria-label="Tabs">  
+                <button  
+                  @click="activeTab = 'roadmaps'"  
+                  :class="activeTab === 'roadmaps' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"  
+                  class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"  
+                >  
+                  Roadmaps  
+                </button>  
+                <button  
+                  @click="activeTab = 'courses'"  
+                  :class="activeTab === 'courses' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"  
+                  class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"  
+                >  
+                  All Courses  
+                </button>  
+              </nav>  
+            </div>  
+          </div>  
+          
+          <!-- Tab Content -->  
+          <div>  
+            <!-- Roadmaps Tab -->  
+            <div x-show="activeTab === 'roadmaps'">  
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">  
+                <template x-for="roadmap in roadmaps" :key="roadmap.slug">  
+                  <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">  
+                    <div class="px-4 py-5 sm:p-6">  
+                      <h3 class="text-lg font-medium text-gray-900" x-text="roadmap.title"></h3>  
+                      
+                      <p class="mt-2 text-sm text-gray-500" x-text="roadmap.shortDescription || 'No description available'"></p>  
+                      
+                      <div class="mt-4 space-y-3">  
+                        <template x-for="(term, index) in roadmap.terms" :key="index">  
+                          <div class="bg-gray-50 p-3 rounded-lg">  
+                            <h4 class="font-medium text-gray-800" x-text="term.name"></h4>  
+                            
+                            <div class="mt-2 space-y-2">  
+                              <template x-for="course in term.courses" :key="course.slug">  
+                                <div   
+                                  @click="viewCourse(course)"  
+                                  class="py-2 px-3 rounded-md bg-white shadow-sm hover:bg-gray-50 cursor-pointer flex justify-between items-center"  
+                                >  
+                                  <span x-text="course.title"></span>  
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />  
+                                  </svg>  
+                                </div>  
+                              </template>  
+                            </div>  
+                          </div>  
+                        </template>  
+                      </div>  
+                    </div>  
+                  </div>  
+                </template>  
+              </div>  
+            </div>  
+            
+            <!-- Courses Tab -->  
+            <div x-show="activeTab === 'courses'">  
+              <div class="mb-6">  
+                <div class="max-w-lg">  
+                  <label for="search" class="sr-only">Search</label>  
+                  <div class="relative">  
+                    <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">  
+                      <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />  
+                      </svg>  
+                    </div>  
+                    <input  
+                      id="search"  
+                      x-model="searchQuery"  
+                      @input="performSearch"  
+                      class="block w-full bg-white border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm placeholder-gray-500 focus:outline-none focus:text-gray-900 focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"  
+                      placeholder="Search courses..."  
+                      type="search"  
+                    >  
+                  </div>  
+                </div>  
+              </div>  
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">  
+                <template x-for="course in searchQuery ? searchResults : allCourses" :key="course.slug">  
+                  <div   
+                    @click="viewCourse(course)"  
+                    class="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow cursor-pointer"  
+                  >  
+                    <div class="px-4 py-5 sm:p-6">  
+                      <h3 class="text-lg font-medium text-gray-900" x-text="course.title"></h3>  
+                      
+                      <p class="mt-2 text-sm text-gray-500 line-clamp-3" x-text="course.shortDescription || 'No description available'"></p>  
+                      
+                      <div class="mt-4 flex space-x-2">  
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800" x-text="course.lessonsCount + ' lessons'"></span>  
+                        
+                        <span   
+                          x-show="course.instructors && course.instructors.length > 0"  
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"  
+                        >  
+                          <span x-text="course.instructors[0].displayName"></span>  
+                          <span x-show="course.instructors.length > 1" x-text="' +' + (course.instructors.length - 1)"></span>  
+                        </span>  
+                      </div>  
+                    </div>  
+                  </div>  
+                </template>  
+              </div>  
+            </div>  
+          </div>  
+        </div>  
+      </div>  
+    </main>  
+
+    <!-- Footer -->  
+    <footer class="bg-white border-t border-gray-200 py-8 mt-8">  
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">  
+        <p>This page displays data from your Reforge database using GitHub Pages and Netlify Functions.</p>  
+        <p class="mt-2">Last refreshed: <span x-text="formatDateTime(lastRefreshed)"></span></p>  
+      </div>  
+    </footer>  
+  </div>  
+
+  <script src="js/app.js"></script>  
+</body>  
+</html>  
