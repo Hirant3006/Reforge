@@ -23,6 +23,12 @@
   to = "/lesson.html"  
   status = 200  
 
-[functions]  
-  # Increase timeout to give MongoDB connections time to establish  
-  timeout = 30  
+[functions]
+  node_bundler = "esbuild"
+  
+[[functions]]
+  timeout = 30
+Or alternatively:
+
+[functions]
+  timeout = 30
