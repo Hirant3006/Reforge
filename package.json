@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Hirant3006/Reforge#readme",
   "dependencies": {
+    "mongodb": "^5.9.2",
     "mongoose": "^8.12.1"
   },
   "devDependencies": {

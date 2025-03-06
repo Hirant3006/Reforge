@@ -1,62 +1,27 @@
-const mongoose = require('mongoose');  
-
-// Define schemas  
-const courseSchema = new mongoose.Schema({  
-  title: String,  
-  slug: String,  
-  shortDescription: String,  
-  longDescription: String,  
-  instructors: [{  
-    displayName: String,  
-    bio: String  
-  }],  
-  updatedAt: Date  
-});  
-
-const sectionSchema = new mongoose.Schema({  
-  title: String,  
-  order: Number,  
-  courseId: mongoose.Schema.Types.ObjectId  
-});  
-
-const lessonSchema = new mongoose.Schema({  
-  title: String,  
-  content: String,  
-  videoUrl: String,  
-  slidesUrl: String,  
-  videoDuration: Number,  
-  sectionId: mongoose.Schema.Types.ObjectId,  
-  order: Number,  
-  typeLesson: String,  
-  tag: String  
-});  
+const { MongoClient, ObjectId } = require('mongodb');  
 
 // Database connection handler  
+let cachedClient = null;  
 let cachedDb = null;  
+
 async function connectToDatabase() {  
-  if (cachedDb) {  
-    return cachedDb;  
+  if (cachedClient && cachedDb) {  
+    return { client: cachedClient, db: cachedDb };  
   }  
 
   // Connect to MongoDB  
-  const connection = await mongoose.connect(process.env.MONGODB_URI, {  
+  const client = new MongoClient(process.env.MONGODB_URI, {  
     useNewUrlParser: true,  
     useUnifiedTopology: true  
   });  
+
+  await client.connect();  
+  const db = client.db('reforge'); // Specify your database name here  
   
-  // Define models  
-  const Course = mongoose.model('Course', courseSchema);  
-  const Section = mongoose.model('Section', sectionSchema);  
-  const Lesson = mongoose.model('Lesson', lessonSchema);  
+  cachedClient = client;  
+  cachedDb = db;  
   
-  cachedDb = {  
-    connection,  
-    Course,  
-    Section,  
-    Lesson  
-  };  
-  
-  return cachedDb;  
+  return { client, db };  
 }  
 
 exports.handler = async function(event, context) {  
@@ -69,30 +34,42 @@ exports.handler = async function(event, context) {
   if (!courseSlug) {  
     return {  
       statusCode: 400,  
+      headers: {  
+        'Access-Control-Allow-Origin': '*'  
+      },  
       body: JSON.stringify({ error: 'Course slug is required' })  
     };  
   }  
   
   try {  
     // Connect to database  
-    const db = await connectToDatabase();  
+    const { db } = await connectToDatabase();  
     
     // Get the course  
-    const course = await db.Course.findOne({ slug: courseSlug }).lean();  
+    const course = await db.collection('courses').findOne({ slug: courseSlug });  
     
     if (!course) {  
       return {  
         statusCode: 404,  
+        headers: {  
+          'Access-Control-Allow-Origin': '*'  
+        },  
         body: JSON.stringify({ error: 'Course not found' })  
       };  
     }  
     
     // Get sections for this course  
-    const sections = await db.Section.find({ courseId: course._id }).sort({ order: 1 }).lean();  
+    const sections = await db.collection('sections')  
+      .find({ courseId: new ObjectId(course._id) })  
+      .sort({ order: 1 })  
+      .toArray();  
     
     // For each section, get its lessons  
     const sectionsWithLessons = await Promise.all(sections.map(async (section) => {  
-      const lessons = await db.Lesson.find({ sectionId: section._id }).sort({ order: 1 }).lean();  
+      const lessons = await db.collection('lessons')  
+        .find({ sectionId: new ObjectId(section._id) })  
+        .sort({ order: 1 })  
+        .toArray();  
       
       return {  
         ...section,  
@@ -103,16 +80,22 @@ exports.handler = async function(event, context) {
     // Return the course with sections and lessons  
     return {  
       statusCode: 200,  
+      headers: {  
+        'Access-Control-Allow-Origin': '*'  
+      },  
       body: JSON.stringify({  
         ...course,  
         sections: sectionsWithLessons  
       })  
     };  
   } catch (error) {  
-    console.error(error);  
+    console.error('Error:', error);  
     
     return {  
       statusCode: 500,  
+      headers: {  
+        'Access-Control-Allow-Origin': '*'  
+      },  
       body: JSON.stringify({ error: 'Failed to fetch course details' })  
     };  
   }  
