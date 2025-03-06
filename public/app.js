@@ -1,7 +1,7 @@
 // Dynamic API endpoint based on environment  
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:8888/.netlify/functions'
-  : 'https://spontaneous-cannoli-747251.netlify.app/.netlify/functions';
+  : 'https://hoccunghuy.netlify.app/.netlify/functions';
 
 // Log which environment we're using  
 console.log(`Running in ${window.location.hostname === 'localhost' ? 'development' : 'production'} environment`);
@@ -31,6 +31,7 @@ function appData() {
         this.loading = false;
       }
     },
+    
     getLessonCount(course) {
       console.log({ course })
       // If course has a lessons array, return its length  
@@ -107,7 +108,7 @@ function appData() {
         throw err;
       }
     },
-    
+
     viewCourse(course) {
       if (!course || !course.slug) {
         console.error("Cannot view course: missing slug", course);
