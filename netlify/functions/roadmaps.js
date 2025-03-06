@@ -1,51 +1,10 @@
 // netlify/functions/roadmaps.js  
 const { MongoClient } = require('mongodb');
+const { connectToDatabase } = require('./utils/db');  
 
 // Database connection handler  
 let cachedClient = null;  
 let cachedDb = null;  
-
-async function connectToDatabase() {  
-  if (cachedClient && cachedDb) {  
-    return { client: cachedClient, db: cachedDb };  
-  }  
-
-  try {  
-    console.log("Connecting to MongoDB...");  
-
-    // Get MongoDB URI from environment variable  
-    const MONGODB_URI = process.env.MONGODB_URI;  
-    
-    if (!MONGODB_URI) {  
-      throw new Error('MONGODB_URI environment variable is not set');  
-    }  
-
-    // Connect to MongoDB Atlas instead of localhost  
-    const client = new MongoClient(MONGODB_URI, {  
-      useNewUrlParser: true,  
-      useUnifiedTopology: true  
-    });  
-
-    await client.connect();  
-    console.log("Connected to MongoDB successfully");  
-
-    // Get database name from URI or use default  
-    const dbName = MONGODB_URI.includes('/') ?   
-      MONGODB_URI.split('/').pop().split('?')[0] :   
-      'wegrow';  
-      
-    const db = client.db(dbName);  
-    console.log(`Using '${dbName}' database`);  
-
-    cachedClient = client;  
-    cachedDb = db;  
-
-    return { client, db };  
-  } catch (err) {  
-    console.error("MongoDB connection error:", err);  
-    throw err;  
-  }  
-}  
 exports.handler = async function (event, context) {
   // Prevents connection pool from staying open  
   context.callbackWaitsForEmptyEventLoop = false;

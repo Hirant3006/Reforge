@@ -1,18 +1,14 @@
 // netlify/functions/course-categories.js  
 const { MongoClient } = require('mongodb');  
+const { connectToDatabase } = require('./utils/db');  
 
 exports.handler = async function(event, context) {  
   context.callbackWaitsForEmptyEventLoop = false;  
   
   try {  
     console.log("Testing course categories...");  
-    
-    const client = new MongoClient(process.env.MONGODB_URI, {  
-      useNewUrlParser: true,  
-      useUnifiedTopology: true  
-    });  
-    
-    await client.connect();  
+    const { db } = await connectToDatabase();  
+
     console.log("Connected to MongoDB successfully");  
     
     const db = client.db('reforge');  
@@ -81,7 +77,8 @@ exports.handler = async function(event, context) {
 'Access-Control-Allow-Origin': '*', // Or restrict to specific domains like 'https://hoccunghuy.netlify.app'  
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',  
     'Access-Control-Allow-Headers': 'Content-Type',  
-    'Access-Control-Max-Age': '86400'  ,        'Content-Type': 'application/json'  
+    'Access-Control-Max-Age': '86400'  ,        
+    'Content-Type': 'application/json'  
       },  
       body: JSON.stringify({  
         totalCourses: courses.length,  

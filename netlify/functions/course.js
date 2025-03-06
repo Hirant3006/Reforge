@@ -1,28 +1,9 @@
 const { MongoClient, ObjectId } = require('mongodb');  
+const { connectToDatabase } = require('./utils/db');  
 
 // Database connection handler  
 let cachedClient = null;  
 let cachedDb = null;  
-
-async function connectToDatabase() {  
-  if (cachedClient && cachedDb) {  
-    return { client: cachedClient, db: cachedDb };  
-  }  
-  
-  // Connect to MongoDB  
-  const client = new MongoClient(process.env.MONGODB_URI, {  
-    useNewUrlParser: true,  
-    useUnifiedTopology: true  
-  });  
-
-  await client.connect();  
-  const db = client.db('reforge'); // Specify your database name here  
-  
-  cachedClient = client;  
-  cachedDb = db;  
-  
-  return { client, db };  
-}  
 
 exports.handler = async function(event, context) {  
   // Prevents connection pool from staying open  

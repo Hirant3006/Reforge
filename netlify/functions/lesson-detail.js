@@ -1,40 +1,10 @@
 // netlify/functions/lesson-detail.js  
 const { MongoClient, ObjectId } = require('mongodb');
+const { connectToDatabase } = require('./utils/db');  
 
 // Database connection handler  
 let cachedClient = null;
 let cachedDb = null;
-
-async function connectToDatabase() {
-    if (cachedClient && cachedDb) {
-        return { client: cachedClient, db: cachedDb };
-    }
-
-    try {
-        console.log("Connecting to local MongoDB...");
-
-        // Connect to MongoDB on localhost  
-        const client = new MongoClient("mongodb://localhost:27017", {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
-
-        await client.connect();
-        console.log("Connected to MongoDB successfully");
-
-        // Use the wegrow database  
-        const db = client.db('wegrow');
-        console.log("Using 'wegrow' database");
-
-        cachedClient = client;
-        cachedDb = db;
-
-        return { client, db };
-    } catch (err) {
-        console.error("MongoDB connection error:", err);
-        throw err;
-    }
-}
 
 exports.handler = async function (event, context) {
     // Prevents connection pool from staying open  
@@ -51,7 +21,7 @@ exports.handler = async function (event, context) {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',  
     'Access-Control-Allow-Headers': 'Content-Type',  
     'Access-Control-Max-Age': '86400'  ,                'Content-Type': 'application/json'
-    
+
             },
             body: JSON.stringify({
                 error: 'Missing course slug or lesson slug parameters'
