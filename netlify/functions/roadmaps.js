@@ -2,40 +2,49 @@
 const { MongoClient } = require('mongodb');
 
 // Database connection handler  
-let cachedClient = null;
-let cachedDb = null;
+let cachedClient = null;  
+let cachedDb = null;  
 
-async function connectToDatabase() {
-  if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb };
-  }
+async function connectToDatabase() {  
+  if (cachedClient && cachedDb) {  
+    return { client: cachedClient, db: cachedDb };  
+  }  
 
-  try {
-    console.log("Connecting to local MongoDB...");
+  try {  
+    console.log("Connecting to MongoDB...");  
 
-    // Connect to MongoDB on localhost  
-    const client = new MongoClient("mongodb://localhost:27017", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    // Get MongoDB URI from environment variable  
+    const MONGODB_URI = process.env.MONGODB_URI;  
+    
+    if (!MONGODB_URI) {  
+      throw new Error('MONGODB_URI environment variable is not set');  
+    }  
 
-    await client.connect();
-    console.log("Connected to MongoDB successfully");
+    // Connect to MongoDB Atlas instead of localhost  
+    const client = new MongoClient(MONGODB_URI, {  
+      useNewUrlParser: true,  
+      useUnifiedTopology: true  
+    });  
 
-    // Use the wegrow database  
-    const db = client.db('wegrow');
-    console.log("Using 'wegrow' database");
+    await client.connect();  
+    console.log("Connected to MongoDB successfully");  
 
-    cachedClient = client;
-    cachedDb = db;
+    // Get database name from URI or use default  
+    const dbName = MONGODB_URI.includes('/') ?   
+      MONGODB_URI.split('/').pop().split('?')[0] :   
+      'wegrow';  
+      
+    const db = client.db(dbName);  
+    console.log(`Using '${dbName}' database`);  
 
-    return { client, db };
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
-    throw err;
-  }
-  
+    cachedClient = client;  
+    cachedDb = db;  
 
+    return { client, db };  
+  } catch (err) {  
+    console.error("MongoDB connection error:", err);  
+    throw err;  
+  }  
 }  
 exports.handler = async function (event, context) {
   // Prevents connection pool from staying open  
