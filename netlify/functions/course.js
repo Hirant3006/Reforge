@@ -8,7 +8,7 @@ async function connectToDatabase() {
   if (cachedClient && cachedDb) {  
     return { client: cachedClient, db: cachedDb };  
   }  
-
+  
   // Connect to MongoDB  
   const client = new MongoClient(process.env.MONGODB_URI, {  
     useNewUrlParser: true,  
@@ -35,8 +35,10 @@ exports.handler = async function(event, context) {
     return {  
       statusCode: 400,  
       headers: {  
-        'Access-Control-Allow-Origin': '*'  
-      },  
+'Access-Control-Allow-Origin': '*', // Or restrict to specific domains like 'https://hoccunghuy.netlify.app'  
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',  
+    'Access-Control-Allow-Headers': 'Content-Type',  
+    'Access-Control-Max-Age': '86400'  ,         },  
       body: JSON.stringify({ error: 'Course slug is required' })  
     };  
   }  
@@ -52,8 +54,10 @@ exports.handler = async function(event, context) {
       return {  
         statusCode: 404,  
         headers: {  
-          'Access-Control-Allow-Origin': '*'  
-        },  
+'Access-Control-Allow-Origin': '*', // Or restrict to specific domains like 'https://hoccunghuy.netlify.app'  
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',  
+    'Access-Control-Allow-Headers': 'Content-Type',  
+    'Access-Control-Max-Age': '86400'  ,           },  
         body: JSON.stringify({ error: 'Course not found' })  
       };  
     }  
@@ -81,8 +85,10 @@ exports.handler = async function(event, context) {
     return {  
       statusCode: 200,  
       headers: {  
-        'Access-Control-Allow-Origin': '*'  
-      },  
+'Access-Control-Allow-Origin': '*', // Or restrict to specific domains like 'https://hoccunghuy.netlify.app'  
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',  
+    'Access-Control-Allow-Headers': 'Content-Type',  
+    'Access-Control-Max-Age': '86400'  ,         },  
       body: JSON.stringify({  
         ...course,  
         sections: sectionsWithLessons  
@@ -94,8 +100,10 @@ exports.handler = async function(event, context) {
     return {  
       statusCode: 500,  
       headers: {  
-        'Access-Control-Allow-Origin': '*'  
-      },  
+'Access-Control-Allow-Origin': '*', // Or restrict to specific domains like 'https://hoccunghuy.netlify.app'  
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',  
+    'Access-Control-Allow-Headers': 'Content-Type',  
+    'Access-Control-Max-Age': '86400'  ,         },  
       body: JSON.stringify({ error: 'Failed to fetch course details' })  
     };  
   }  

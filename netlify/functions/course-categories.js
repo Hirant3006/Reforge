@@ -78,8 +78,10 @@ exports.handler = async function(event, context) {
     return {  
       statusCode: 200,  
       headers: {  
-        'Access-Control-Allow-Origin': '*',  
-        'Content-Type': 'application/json'  
+'Access-Control-Allow-Origin': '*', // Or restrict to specific domains like 'https://hoccunghuy.netlify.app'  
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',  
+    'Access-Control-Allow-Headers': 'Content-Type',  
+    'Access-Control-Max-Age': '86400'  ,        'Content-Type': 'application/json'  
       },  
       body: JSON.stringify({  
         totalCourses: courses.length,  
@@ -93,8 +95,10 @@ exports.handler = async function(event, context) {
     return {  
       statusCode: 500,  
       headers: {  
-        'Access-Control-Allow-Origin': '*',  
-        'Content-Type': 'application/json'  
+'Access-Control-Allow-Origin': '*', // Or restrict to specific domains like 'https://hoccunghuy.netlify.app'  
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',  
+    'Access-Control-Allow-Headers': 'Content-Type',  
+    'Access-Control-Max-Age': '86400'  ,        'Content-Type': 'application/json'  
       },  
       body: JSON.stringify({  
         error: 'Course categories test failed',  

@@ -34,8 +34,9 @@ async function connectToDatabase() {
     console.error("MongoDB connection error:", err);
     throw err;
   }
-}
+  
 
+}  
 exports.handler = async function (event, context) {
   // Prevents connection pool from staying open  
   context.callbackWaitsForEmptyEventLoop = false;
@@ -99,8 +100,10 @@ exports.handler = async function (event, context) {
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
+'Access-Control-Allow-Origin': '*', // Or restrict to specific domains like 'https://hoccunghuy.netlify.app'  
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',  
+    'Access-Control-Allow-Headers': 'Content-Type',  
+    'Access-Control-Max-Age': '86400'  ,        'Content-Type': 'application/json'
       },
       body: JSON.stringify(roadmapsWithCourses)
     };
@@ -110,8 +113,10 @@ exports.handler = async function (event, context) {
     return {
       statusCode: 500,
       headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
+'Access-Control-Allow-Origin': '*', // Or restrict to specific domains like 'https://hoccunghuy.netlify.app'  
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',  
+    'Access-Control-Allow-Headers': 'Content-Type',  
+    'Access-Control-Max-Age': '86400'  ,        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         error: 'Failed to fetch roadmaps',
