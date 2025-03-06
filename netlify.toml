@@ -23,3 +23,6 @@
   to = "/lesson.html"  
   status = 200  
 
+[functions]  
+  # Increase timeout to give MongoDB connections time to establish  
+  timeout = 30  
