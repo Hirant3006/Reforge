@@ -22,9 +22,4 @@
   from = "/course/*/lesson/*"  
   to = "/lesson.html"  
   status = 200  
-
-[functions]
-  node_bundler = "esbuild"
   
-[[functions]]
-  timeout = 30
