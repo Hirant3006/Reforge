@@ -37,7 +37,7 @@ async function connectToDatabase() {
 
     cachedClient = client;  
     cachedDb = db;  
-
+    
     return { client, db };  
   } catch (err) {  
     console.error("MongoDB connection error:", err);  

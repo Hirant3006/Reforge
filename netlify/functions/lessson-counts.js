@@ -1,10 +1,7 @@
 // netlify/functions/lesson-counts.js  
 const { MongoClient } = require('mongodb');  
+const { connectToDatabase } = require('./utils/db');  
 
-// Reuse your database connection code  
-async function connectToDatabase() {  
-  // Same as in roadmaps.js  
-}  
 
 exports.handler = async function(event, context) {  
   context.callbackWaitsForEmptyEventLoop = false;  
