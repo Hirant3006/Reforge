@@ -1,772 +1,412 @@
-<!DOCTYPE html>  
-<html lang="en">  
-<head>  
-    <meta charset="UTF-8">  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <title>Course Detail</title>  
-    <!-- Tailwind CSS -->  
-    <script src="https://cdn.tailwindcss.com"></script>  
-    <!-- Alpine.js -->  
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>  
-    <!-- Font Awesome -->  
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">  
-    <style>  
-        [x-cloak] { display: none !important; }  
-        
-        /* Custom scrollbar */  
-        .sidebar-scroll::-webkit-scrollbar {  
-            width: 6px;  
-        }  
-        
-        .sidebar-scroll::-webkit-scrollbar-track {  
-            background: #f1f1f1;  
-        }  
-        
-        .sidebar-scroll::-webkit-scrollbar-thumb {  
-            background: #cbd5e0;  
-            border-radius: 3px;  
-        }  
-        
-        .sidebar-scroll::-webkit-scrollbar-thumb:hover {  
-            background: #a0aec0;  
-        }  
-        
-        /* Lesson content styling */  
-        .lesson-content h1 {  
-            font-size: 1.75rem;  
-            font-weight: 700;  
-            margin-top: 1.5rem;  
-            margin-bottom: 1rem;  
-        }  
-        
-        .lesson-content h2 {  
-            font-size: 1.5rem;  
-            font-weight: 600;  
-            margin-top: 1.25rem;  
-            margin-bottom: 0.75rem;  
-        }  
-        
-        .lesson-content h3 {  
-            font-size: 1.25rem;  
-            font-weight: 600;  
-            margin-top: 1rem;  
-            margin-bottom: 0.5rem;  
-        }  
-        
-        .lesson-content p {  
-            margin-bottom: 1rem;  
-            line-height: 1.6;  
-        }  
-        
-        .lesson-content ul, .lesson-content ol {  
-            margin-bottom: 1rem;  
-            padding-left: 1.5rem;  
-        }  
-        
-        .lesson-content ul {  
-            list-style-type: disc;  
-        }  
-        
-        .lesson-content ol {  
-            list-style-type: decimal;  
-        }  
-        
-        .lesson-content a {  
-            color: #3182ce;  
-            text-decoration: underline;  
-        }  
-        
-        .lesson-content pre {  
-            background-color: #f7fafc;  
-            border-radius: 0.25rem;  
-            padding: 1rem;  
-            margin-bottom: 1rem;  
-            overflow-x: auto;  
-        }  
-        
-        .lesson-content code {  
-            background-color: #edf2f7;  
-            padding: 0.25rem;  
-            border-radius: 0.25rem;  
-            font-family: monospace;  
-        }  
-        
-        .lesson-content img {  
-            max-width: 100%;  
-            height: auto;  
-            margin: 1rem 0;  
-        }  
-        
-        .lesson-content blockquote {  
-            border-left: 4px solid #a0aec0;  
-            padding-left: 1rem;  
-            font-style: italic;  
-            margin: 1rem 0;  
-        }  
-        
-        /* Sidebar tabs styling */  
-        .sidebar-tab.active {  
-            color: #4f46e5;  
-            border-bottom-color: #4f46e5;  
-        }  
-    </style>  
-</head>  
-<body class="bg-gray-100 h-screen flex flex-col">  
-    <div x-data="courseDetailApp()" x-init="init()" class="flex flex-col h-full">  
-        <!-- Header -->  
-        <header class="bg-white shadow z-10">  
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">  
-                <div class="flex justify-between items-center py-4">  
-                    <h1 class="text-xl font-bold text-gray-900" x-text="course ? course.title : 'Loading course...'"></h1>  
-                    <div class="text-sm text-gray-500">  
-                    </div>  
-                </div>  
-            </div>  
-        </header>  
+<!DOCTYPE html>
+<html lang="en">
 
-        <!-- Loading state -->  
-        <div x-show="loading" class="flex-1 flex justify-center items-center">  
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>  
-        </div>  
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Detail</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
 
-        <!-- Error state -->  
-        <div x-show="error" class="flex-1 flex justify-center items-center p-4 text-red-700">  
-            <div class="bg-red-100 rounded-lg p-6 max-w-md">  
-                <h3 class="text-lg font-medium mb-2">Error</h3>  
-                <p x-text="error"></p>  
-            </div>  
-        </div>  
+        /* Custom scrollbar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
 
-        <!-- Main content with sidebar -->  
-        <div x-show="!loading && !error && course" class="flex-1 flex overflow-hidden" x-cloak>  
-            <!-- Sidebar -->  
-            <div class="w-80 bg-white shadow-md flex flex-col h-full border-r">  
-                <!-- Return to main page link -->  
-                <div class="p-3 border-b bg-gray-50">  
-                    <a href="/" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">  
-                        <i class="fas fa-arrow-left mr-2"></i>  
-                        <span>Return to Dashboard</span>  
-                    </a>  
-                </div>  
-                
-                <!-- Sidebar tabs -->  
-                <div class="flex border-b">  
-                    <button @click="sidebarTab = 'contents'"   
-                            :class="{'active': sidebarTab === 'contents'}"  
-                            class="sidebar-tab flex-1 py-3 text-center font-medium text-gray-700 border-b-2 border-transparent">  
-                        Course Contents  
-                    </button>  
-                    <button @click="sidebarTab = 'courses'"  
-                            :class="{'active': sidebarTab === 'courses'}"  
-                            class="sidebar-tab flex-1 py-3 text-center font-medium text-gray-700 border-b-2 border-transparent">  
-                        Browse Courses  
-                    </button>  
-                </div>  
-                
-                <!-- Course contents tab -->  
-                <div x-show="sidebarTab === 'contents'" class="flex-1 overflow-y-auto sidebar-scroll">  
-                    <template x-for="section in getSortedSections()" :key="section._id">  
-                        <div class="border-b border-gray-200">  
-                            <!-- Section header -->  
-                            <div @click="toggleSection(section._id)"   
-                                class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors">  
-                                <div class="flex items-center justify-between">  
-                                    <h4 class="font-medium text-gray-900"   
-                                        x-text="section.title || section.name || 'Untitled Section'"></h4>  
-                                    <div>  
-                                        <i :class="isSectionOpen(section._id) ? 'fa-chevron-up' : 'fa-chevron-down'"   
-                                        class="fas text-gray-500 text-xs"></i>  
-                                    </div>  
-                                </div>  
-                            </div>  
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
 
-                            <!-- Section content (lessons) -->  
-                            <div x-show="isSectionOpen(section._id)" class="bg-gray-50">  
-                                <!-- Loading state for lessons -->  
-                                <div x-show="sectionsLoading[section._id]" class="px-6 py-2 text-xs">  
-                                    <div class="inline-block animate-spin rounded-full h-3 w-3 border-2 border-blue-600 border-t-transparent mr-2"></div>  
-                                    <span class="text-gray-600">Loading...</span>  
-                                </div>  
-                                
-                                <!-- Lessons list when loaded -->  
-                                <ul x-show="!sectionsLoading[section._id] && sectionLessons[section._id] && sectionLessons[section._id].length > 0">  
-                                    <template x-for="(lesson, lessonIndex) in getSortedLessons(section)" :key="lesson._id || lessonIndex">  
-                                        <li @click="selectLesson(lesson)"   
-                                            :class="{'bg-blue-50 border-l-4 border-blue-500': isLessonSelected(lesson), 'border-l-4 border-transparent': !isLessonSelected(lesson)}"  
-                                            class="px-6 py-2 text-sm hover:bg-blue-50 transition-colors cursor-pointer">  
-                                            <div class="flex items-center">  
-                                                <div class="w-5 h-5 rounded-full bg-gray-200 flex-shrink-0 mr-3 flex items-center justify-center text-xs text-gray-700">  
-                                                    <i class="fas fa-play-circle" :class="{'text-blue-600': isLessonSelected(lesson), 'text-gray-400': !isLessonSelected(lesson)}"></i>  
-                                                </div>  
-                                                <span class="truncate" x-text="lesson.title || lesson.name || `Lesson ${lessonIndex + 1}`"></span>  
-                                            </div>  
-                                        </li>  
-                                    </template>  
-                                </ul>  
-                                
-                                <!-- Empty lessons state -->  
-                                <div x-show="!sectionsLoading[section._id] && (!sectionLessons[section._id] || sectionLessons[section._id].length === 0)"  
-                                     class="px-6 py-2 text-xs text-gray-500">  
-                                    No lessons available  
-                                </div>  
-                            </div>  
-                        </div>  
-                    </template>  
-                </div>  
-                
-                <!-- Browse courses tab -->  
-                <div x-show="sidebarTab === 'courses'" class="flex-1 overflow-y-auto sidebar-scroll">  
-                    <!-- Roadmaps loading -->  
-                    <div x-show="loadingRoadmaps" class="p-4 text-center text-sm text-gray-500">  
-                        <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent mr-2"></div>  
-                        <span>Loading roadmaps...</span>  
-                    </div>  
-                    
-                    <!-- Roadmaps error -->  
-                    <div x-show="roadmapsError" class="p-4 text-sm text-red-600">  
-                        <p x-text="roadmapsError"></p>  
-                    </div>  
-                    
-                    <!-- Roadmaps list -->  
-                    <div x-show="!loadingRoadmaps && !roadmapsError">  
-                        <template x-for="roadmap in roadmaps" :key="roadmap._id">  
-                            <div class="border-b">  
-                                <!-- Roadmap header -->  
-                                <div @click="toggleRoadmap(roadmap._id)"   
-                                     class="px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">  
-                                    <div class="flex items-center justify-between">  
-                                        <h4 class="font-medium text-gray-900" x-text="roadmap.title"></h4>  
-                                        <div>  
-                                            <i :class="isRoadmapOpen(roadmap._id) ? 'fa-chevron-up' : 'fa-chevron-down'"   
-                                            class="fas text-gray-500 text-xs"></i>  
-                                        </div>  
-                                    </div>  
-                                    <p class="text-xs text-gray-500 mt-1" x-text="roadmap.shortDescription"></p>  
-                                </div>  
-                                
-                                <!-- Roadmap courses -->  
-                                <div x-show="isRoadmapOpen(roadmap._id)">  
-                                    <template x-for="term in roadmap.terms" :key="term._id">  
-                                        <!-- Term courses list -->  
-                                        <ul x-show="term.courses && term.courses.length > 0">  
-                                            <template x-for="termCourse in term.courses" :key="termCourse._id">  
-                                                <li :class="{'bg-blue-50': course && termCourse._id === course._id}"  
-                                                    class="px-6 py-2 hover:bg-gray-50 transition-colors">  
-                                                    <a :href="`/course/${termCourse.slug}`" class="block">  
-                                                        <div class="flex items-center">  
-                                                            <div class="w-8 h-8 rounded bg-gray-200 flex-shrink-0 mr-3 flex items-center justify-center overflow-hidden">  
-                                                                <img x-show="termCourse.thumbnail" :src="termCourse.thumbnail" class="w-full h-full object-cover" alt="Course" />  
-                                                                <i x-show="!termCourse.thumbnail" class="fas fa-book text-gray-400"></i>  
-                                                            </div>  
-                                                            <div class="flex-1 min-w-0">  
-                                                                <p class="text-sm font-medium text-gray-900 truncate" x-text="termCourse.title"></p>  
-                                                                <p class="text-xs text-gray-500 truncate" x-text="termCourse.description || 'No description'"></p>  
-                                                            </div>  
-                                                        </div>  
-                                                    </a>  
-                                                </li>  
-                                            </template>  
-                                        </ul>  
-                                        
-                                        <!-- Empty term courses state -->  
-                                        <div x-show="!term.courses || term.courses.length === 0"  
-                                             class="px-6 py-2 text-xs text-gray-500">  
-                                            No courses available in this term  
-                                        </div>  
-                                    </template>  
-                                </div>  
-                            </div>  
-                        </template>  
-                    </div>  
-                </div>  
-            </div>  
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
 
-            <!-- Main content area -->  
-            <div class="flex-1 overflow-y-auto p-6 bg-white ml-4 shadow-md">  
-                <!-- No lesson selected state -->  
-                <div x-show="!selectedLesson" class="h-full flex flex-col items-center justify-center text-gray-500">  
-                    <i class="fas fa-book-open text-5xl mb-4"></i>  
-                    <h3 class="text-xl font-medium mb-2">Select a lesson to begin</h3>  
-                    <p class="text-sm">Choose a lesson from the sidebar to view its content</p>  
-                </div>  
-                
-                <!-- Lesson content when selected -->  
-                <div x-show="selectedLesson" class="max-w-4xl mx-auto">  
-                    <h1 class="text-2xl font-bold mb-4" x-text="selectedLesson?.title || selectedLesson?.name"></h1>  
-                    
-                    <div class="text-sm text-gray-500 mb-6">  
-                        <span x-show="selectedLesson?.duration">  
-                            <i class="far fa-clock mr-1"></i>  
-                            <span x-text="`${selectedLesson.duration} min`"></span>  
-                        </span>  
-                    </div>  
-                    
-                    <!-- Render HTML content safely -->  
-                    <div class="lesson-content prose prose-blue max-w-none" x-html="selectedLesson?.content || ''"></div>  
-                    
-                    <!-- Navigation buttons -->  
-                    <div class="mt-12 border-t pt-6 flex justify-between">  
-                        <button @click="navigateToPreviousLesson()"   
-                                x-show="hasPreviousLesson()"  
-                                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded flex items-center">  
-                            <i class="fas fa-arrow-left mr-2"></i> Previous Lesson  
-                        </button>  
-                        <div></div> <!-- Spacer -->  
-                        <button @click="navigateToNextLesson()"   
-                                x-show="hasNextLesson()"  
-                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center">  
-                            Next Lesson <i class="fas fa-arrow-right ml-2"></i>  
-                        </button>  
-                    </div>  
-                </div>  
-            </div>  
-        </div>  
-    </div>  
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
 
-    <script>  
-        function courseDetailApp() {  
-            return {  
-                course: null,  
-                loading: true,  
-                error: null,  
-                courseSlug: '',  
-                openSections: {}, // Tracks which sections are expanded by ID  
-                sectionLessons: {}, // Store lessons by section ID  
-                sectionsLoading: {}, // Track which sections are loading lessons  
-                sectionsFetched: {}, // Track which sections have attempted to fetch lessons  
-                selectedLesson: null, // Currently selected lesson  
-                allLessons: [], // Flat array of all lessons for navigation  
-                API_BASE_URL: '', // Leave empty for relative URLs on the same domain  
-                
-                // Sidebar tabs  
-                sidebarTab: 'contents', // 'contents' or 'courses'  
-                
-                // Roadmaps data (instead of categories)  
-                roadmaps: [],  
-                loadingRoadmaps: false,  
-                roadmapsError: null,  
-                openRoadmaps: {},  
-                
-                init() {  
-                    // Extract course slug from URL  
-                    const pathSegments = window.location.pathname.split('/');  
-                    const courseIndex = pathSegments.indexOf('course');  
-                    
-                    if (courseIndex !== -1 && pathSegments.length > courseIndex + 1) {  
-                        this.courseSlug = pathSegments[courseIndex + 1];  
-                    } else {  
-                        this.error = 'Invalid course URL';  
-                        this.loading = false;  
-                        return;  
-                    }  
-                    
-                    if (!this.courseSlug) {  
-                        this.error = 'Invalid course URL';  
-                        this.loading = false;  
-                        return;  
-                    }  
-                    
-                    this.fetchCourseBySlug();  
-                    this.fetchRoadmaps();  
-                },  
-                
-                async fetchCourseBySlug() {  
-                    this.loading = true;  
-                    this.error = null;  
-                    
-                    try {  
-                        const response = await fetch(`${this.API_BASE_URL}/.netlify/functions/course-detail?slug=${this.courseSlug}`);  
-                        
-                        if (!response.ok) {  
-                            throw new Error(`Failed to fetch course. Status: ${response.status}`);  
-                        }  
-                        
-                        const data = await response.json();  
-                        
-                        if (!data || !data.course) {  
-                            throw new Error('Course not found');  
-                        }  
-                        
-                        this.course = data.course;  
-                        document.title = `${this.course.title} - WeGrow Learning Platform`;  
-                        
-                        // Pre-process sections to ensure they have proper structure  
-                        this.processCourseSections();  
-                        
-                        // Initialize the first section as open if it exists  
-                        if (this.course.sections && Array.isArray(this.course.sections) && this.course.sections.length > 0) {  
-                            const firstSection = this.getSortedSections()[0];  
-                            if (firstSection && firstSection._id) {  
-                                this.openSections[firstSection._id] = true;  
-                                this.fetchLessonsForSection(firstSection);  
-                            }  
-                        }  
-                        
-                    } catch (err) {  
-                        console.error('Error fetching course:', err);  
-                        this.error = err.message || 'Failed to load course';  
-                    } finally {  
-                        this.loading = false;  
-                    }  
-                },  
-                
-                // Process sections to standardize structure  
-                processCourseSections() {  
-                    if (!this.course.sections || !Array.isArray(this.course.sections)) {  
-                        this.course.sections = [];  
-                        return;  
-                    }  
-                    
-                    // Ensure each section has an _id and convert lesson references if needed  
-                    this.course.sections.forEach(section => {  
-                        // Ensure section has an _id  
-                        if (!section._id) {  
-                            section._id = section.id || `section-${Math.random().toString(36).substr(2, 9)}`;  
-                        }  
-                        
-                        // If section has embedded complete lesson objects, store them  
-                        if (section.lessons && Array.isArray(section.lessons) &&   
-                            section.lessons.length > 0 && typeof section.lessons[0] === 'object' &&   
-                            (section.lessons[0].title || section.lessons[0].name)) {  
-                            this.sectionLessons[section._id] = section.lessons;  
-                            this.sectionsFetched[section._id] = true;  
-                        }  
-                        
-                        // Log section data for debugging  
-                        console.log(`Section ${section.title || section.name}:`, {  
-                            _id: section._id,  
-                            showIndex: section.showIndex,  
-                            title: section.title || section.name,  
-                            lessons: section.lessons ? (Array.isArray(section.lessons) ?   
-                                `${section.lessons.length} items (${typeof section.lessons[0]})` : 'not array') : 'none'  
-                        });  
-                    });  
-                },  
-                
-                // Fetch lessons for a section  
-                async fetchLessonsForSection(section) {  
-                    if (!section || !section._id) return;  
-                    
-                    // Important: Add this log to debug the fetch  
-                    console.log(`Attempting to fetch lessons for section: ${section.title || section.name} (${section._id})`);  
-                    console.log(`Section lessons:`, section.lessons);  
-                    
-                    // If we already fetched this section or it's currently loading, don't fetch again  
-                    if (this.sectionsFetched[section._id] || this.sectionsLoading[section._id]) {  
-                        console.log(`Section ${section._id} already fetched or loading.`);  
-                        return;  
-                    }  
-                    
-                    // Mark section as loading and fetched  
-                    this.sectionsLoading[section._id] = true;  
-                    this.sectionsFetched[section._id] = true; // Mark as fetched to prevent duplicate fetches  
-                    
-                    try {  
-                        // Create an array to store lessons  
-                        const lessons = [];  
-                        
-                        // If section has lessons array  
-                        if (section.lessons && Array.isArray(section.lessons)) {  
-                            console.log(`Section has ${section.lessons.length} lessons to process`);  
-                            
-                            // Process each lesson reference  
-                            for (let i = 0; i < section.lessons.length; i++) {  
-                                const lessonRef = section.lessons[i];  
-                                let lessonId;  
-                                
-                                // Determine lesson ID based on type  
-                                if (typeof lessonRef === 'string') {  
-                                    lessonId = lessonRef;  
-                                } else if (lessonRef && lessonRef._id) {  
-                                    // If it's already a lesson object with data, use it directly  
-                                    if (lessonRef.title || lessonRef.name) {  
-                                        lessons.push(lessonRef);  
-                                        continue; // Skip fetching for this lesson  
-                                    }  
-                                    lessonId = lessonRef._id.toString();  
-                                } else if (lessonRef && lessonRef.id) {  
-                                    lessonId = lessonRef.id.toString();  
-                                } else {  
-                                    console.log(`Skipping invalid lesson reference at index ${i}:`, lessonRef);  
-                                    continue;  
-                                }  
-                                
-                                // Fetch the lesson data  
-                                console.log(`Fetching lesson with ID: ${lessonId}`);  
-                                try {  
-                                    const response = await fetch(`${this.API_BASE_URL}/.netlify/functions/lesson-detail?courseSlug=${this.courseSlug}&lessonSlug=${lessonId}`);  
-                                    
-                                    if (response.ok) {  
-                                        const data = await response.json();  
-                                        if (data && data.lesson) {  
-                                            console.log(`Successfully fetched lesson: ${data.lesson.title || data.lesson.name}`);  
-                                            lessons.push(data.lesson);  
-                                        } else {  
-                                            console.warn(`Lesson ${lessonId} returned no data`);  
-                                        }  
-                                    } else {  
-                                        console.warn(`Failed to fetch lesson ${lessonId}: ${response.status}`);  
-                                    }  
-                                } catch (err) {  
-                                    console.error(`Error fetching lesson ${lessonId}:`, err);  
-                                }  
-                            }  
-                        } else {  
-                            console.log(`Section has no lessons array or it's not an array:`, section.lessons);  
-                        }  
-                        
-                        // Store the fetched lessons (even if empty)  
-                        console.log(`Storing ${lessons.length} lessons for section ${section._id}`);  
-                        this.sectionLessons[section._id] = lessons;  
-                        
-                        // Update all lessons array for navigation  
-                        this.updateAllLessons();  
-                        
-                        // Force update for AlpineJS reactivity  
-                        this.sectionLessons = { ...this.sectionLessons };  
-                        
-                        // If this is the first section and we don't have a selected lesson yet,  
-                        // automatically select the first lesson if available  
-                        if (!this.selectedLesson && lessons.length > 0) {  
-                            const firstSectionId = this.getSortedSections()[0]?._id;  
-                            if (section._id === firstSectionId) {  
-                                this.selectLesson(lessons[0]);  
-                            }  
-                        }  
-                        
-                    } catch (err) {  
-                        console.error(`Error fetching lessons for section ${section._id}:`, err);  
-                    } finally {  
-                        this.sectionsLoading[section._id] = false;  
-                        // Force reactivity update  
-                        this.sectionsLoading = { ...this.sectionsLoading };  
-                    }  
-                },  
-                
-                // Update the flat array of all lessons for navigation  
-                updateAllLessons() {  
-                    const allLessons = [];  
-                    
-                    // Get all sections in the correct order  
-                    const sortedSections = this.getSortedSections();  
-                    
-                    // For each section, add its lessons in order  
-                    sortedSections.forEach(section => {  
-                        if (this.sectionLessons[section._id]) {  
-                            const sortedLessons = this.getSortedLessons(section);  
-                            allLessons.push(...sortedLessons);  
-                        }  
-                    });  
-                    
-                    this.allLessons = allLessons;  
-                    console.log(`Updated all lessons array with ${allLessons.length} lessons`);  
-                },  
-                
-                // Fetch roadmaps (replaces categories)  
-                async fetchRoadmaps() {  
-                    this.loadingRoadmaps = true;  
-                    this.roadmapsError = null;  
-                    
-                    try {  
-                        const response = await fetch(`${this.API_BASE_URL}/.netlify/functions/roadmaps`);  
-                        
-                        if (!response.ok) {  
-                            throw new Error(`Failed to fetch roadmaps. Status: ${response.status}`);  
-                        }  
-                        
-                        const data = await response.json();  
-                        
-                        if (!Array.isArray(data)) {  
-                            throw new Error('Invalid roadmaps data');  
-                        }  
-                        
-                        this.roadmaps = data;  
-                        
-                        // Open the first roadmap by default  
-                        if (this.roadmaps.length > 0) {  
-                            const firstRoadmap = this.roadmaps[0];  
-                            this.openRoadmaps[firstRoadmap._id] = true;  
-                        }  
-                        
-                    } catch (err) {  
-                        console.error('Error fetching roadmaps:', err);  
-                        this.roadmapsError = err.message || 'Failed to load roadmaps';  
-                    } finally {  
-                        this.loadingRoadmaps = false;  
-                    }  
-                },  
-                
-                getSortedSections() {  
-                    if (!this.course || !this.course.sections || !Array.isArray(this.course.sections)) {  
-                        return [];  
-                    }  
-                    
-                    return [...this.course.sections].sort((a, b) => {  
-                        // Convert values to numbers explicitly  
-                        const indexA = a.showIndex !== undefined ? Number(a.showIndex) : Number.MAX_SAFE_INTEGER;  
-                        const indexB = b.showIndex !== undefined ? Number(b.showIndex) : Number.MAX_SAFE_INTEGER;  
-                        
-                        if (indexA !== indexB) return indexA - indexB;  
-                        
-                        // Then by order  
-                        const orderA = a.order !== undefined ? Number(a.order) : Number.MAX_SAFE_INTEGER;  
-                        const orderB = b.order !== undefined ? Number(b.order) : Number.MAX_SAFE_INTEGER;  
-                        if (orderA !== orderB) return orderA - orderB;  
-                        
-                        // Finally by title  
-                        return (a.title || '').localeCompare(b.title || '');  
-                    });  
-                },  
-                
-                getSortedLessons(section) {  
-                    if (!section || !section._id) return [];  
-                    
-                    // If we don't have lessons for this section yet, try to fetch them  
-                    if (!this.sectionsFetched[section._id]) {  
-                        console.log(`getSortedLessons: triggering fetch for section ${section._id}`);  
-                        this.fetchLessonsForSection(section);  
-                        return [];  
-                    }  
-                    
-                    const lessons = this.sectionLessons[section._id];  
-                    if (!Array.isArray(lessons) || lessons.length === 0) return [];  
-                    
-                    return [...lessons].sort((a, b) => {  
-                        // Convert values to numbers explicitly  
-                        const indexA = a.showIndex !== undefined ? Number(a.showIndex) : Number.MAX_SAFE_INTEGER;  
-                        const indexB = b.showIndex !== undefined ? Number(b.showIndex) : Number.MAX_SAFE_INTEGER;  
-                        
-                        if (indexA !== indexB) return indexA - indexB;  
-                        
-                        // Then by order  
-                        const orderA = a.order !== undefined ? Number(a.order) : Number.MAX_SAFE_INTEGER;  
-                        const orderB = b.order !== undefined ? Number(b.order) : Number.MAX_SAFE_INTEGER;  
-                        if (orderA !== orderB) return orderA - orderB;  
-                        
-                        // Finally by title  
-                        return (a.title || '').localeCompare(b.title || '');  
-                    });  
-                },  
-                
-                toggleSection(sectionId) {  
-                    if (!sectionId) return;  
-                    
-                    // Important: Added logging for debugging  
-                    console.log(`Toggling section: ${sectionId}`);  
-                    
-                    // Toggle the open state of the section  
-                    this.openSections[sectionId] = !this.openSections[sectionId];  
-                    
-                    // Force Alpine to recognize the change (important for reactivity)  
-                    this.openSections = { ...this.openSections };  
-                    
-                    // If opening a section, fetch its lessons if needed  
-                    if (this.openSections[sectionId]) {  
-                        console.log(`Section ${sectionId} is now open.`);  
-                        const section = this.course.sections.find(s => s._id === sectionId);  
-                        if (section) {  
-                            this.fetchLessonsForSection(section);  
-                        }  
-                    }  
-                },  
-                
-                isSectionOpen(sectionId) {  
-                    return !!this.openSections[sectionId];  
-                },  
-                
-                // Toggle roadmap open/closed state  
-                toggleRoadmap(roadmapId) {  
-                    if (!roadmapId) return;  
-                    
-                    // Toggle the open state of the roadmap  
-                    this.openRoadmaps[roadmapId] = !this.openRoadmaps[roadmapId];  
-                    
-                    // Force Alpine to recognize the change  
-                    this.openRoadmaps = { ...this.openRoadmaps };  
-                },  
-                
-                // Check if a roadmap is open  
-                isRoadmapOpen(roadmapId) {  
-                    return !!this.openRoadmaps[roadmapId];  
-                },  
-                
-                // Select a lesson to display in the main content area  
-                selectLesson(lesson) {  
-                    if (!lesson || !lesson._id) return;  
-                    
-                    console.log(`Selecting lesson: ${lesson.title || lesson.name}`);  
-                    this.selectedLesson = lesson;  
-                    
-                    // Open the section containing this lesson if it's not already open  
-                    const sectionContainingLesson = this.findSectionForLesson(lesson);  
-                    if (sectionContainingLesson && !this.isSectionOpen(sectionContainingLesson._id)) {  
-                        this.openSections[sectionContainingLesson._id] = true;  
-                        this.openSections = { ...this.openSections };  
-                    }  
-                    
-                    // Update URL to include lesson ID without reloading page  
-                    const url = `/course/${this.courseSlug}/lesson/${lesson.slug || lesson._id}`;  
-                    window.history.pushState({ lessonId: lesson._id }, '', url);  
-                    
-                    // Switch to contents tab if on courses tab  
-                    if (this.sidebarTab !== 'contents') {  
-                        this.sidebarTab = 'contents';  
-                    }  
-                },  
-                
-                // Check if a lesson is the currently selected one  
-                isLessonSelected(lesson) {  
-                    return this.selectedLesson && lesson && this.selectedLesson._id === lesson._id;  
-                },  
-                
-                // Find the section that contains a specific lesson  
-                findSectionForLesson(lesson) {  
-                    if (!lesson || !lesson._id) return null;  
-                    
-                    for (const section of this.course.sections) {  
-                        if (this.sectionLessons[section._id]) {  
-                            const foundLesson = this.sectionLessons[section._id].find(l => l._id === lesson._id);  
-                            if (foundLesson) return section;  
-                        }  
-                    }  
-                    
-                    return null;  
-                },  
-                
-                // Navigation methods  
-                hasPreviousLesson() {  
-                    if (!this.selectedLesson) return false;  
-                    
-                    const currentIndex = this.allLessons.findIndex(l => l._id === this.selectedLesson._id);  
-                    return currentIndex > 0;  
-                },  
-                
-                hasNextLesson() {  
-                    if (!this.selectedLesson) return false;  
-                    
-                    const currentIndex = this.allLessons.findIndex(l => l._id === this.selectedLesson._id);  
-                    return currentIndex < this.allLessons.length - 1 && currentIndex >= 0;  
-                },  
-                
-                navigateToPreviousLesson() {  
-                    if (!this.hasPreviousLesson()) return;  
-                    
-                    const currentIndex = this.allLessons.findIndex(l => l._id === this.selectedLesson._id);  
-                    if (currentIndex > 0) {  
-                        this.selectLesson(this.allLessons[currentIndex - 1]);  
-                    }  
-                },  
-                
-                navigateToNextLesson() {  
-                    if (!this.hasNextLesson()) return;  
-                    
-                    const currentIndex = this.allLessons.findIndex(l => l._id === this.selectedLesson._id);  
-                    if (currentIndex >= 0 && currentIndex < this.allLessons.length - 1) {  
-                        this.selectLesson(this.allLessons[currentIndex + 1]);  
-                    }  
-                }  
-            };  
-        }  
-    </script>  
-</body>  
-</html>  
+        /* Lesson content styling */
+        .lesson-content h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-content h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .lesson-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .lesson-content ul,
+        .lesson-content ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .lesson-content ul {
+            list-style-type: disc;
+        }
+
+        .lesson-content ol {
+            list-style-type: decimal;
+        }
+
+        .lesson-content a {
+            color: #3182ce;
+            text-decoration: underline;
+        }
+
+        .lesson-content pre {
+            background-color: #f7fafc;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+        }
+
+        .lesson-content code {
+            background-color: #edf2f7;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+        }
+
+        .lesson-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 1rem 0;
+        }
+
+        .lesson-content blockquote {
+            border-left: 4px solid #a0aec0;
+            padding-left: 1rem;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+
+        /* Sidebar tabs styling */
+        .sidebar-tab.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 h-screen flex flex-col">
+    <div x-data="courseDetailApp()" x-init="init()" class="flex flex-col h-full">
+        <!-- Header -->
+        <header class="bg-white shadow z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center gap-4">
+                        <!-- Add sidebar toggle button -->
+                        <button @click="sidebarHidden = !sidebarHidden" 
+                                class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-xl font-bold text-gray-900" x-text="course ? course.title : 'Loading course...'"></h1>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Loading state -->
+        <div x-show="loading" class="flex-1 flex justify-center items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+        </div>
+
+        <!-- Error state -->
+        <div x-show="error" class="flex-1 flex justify-center items-center p-4 text-red-700">
+            <div class="bg-red-100 rounded-lg p-6 max-w-md">
+                <h3 class="text-lg font-medium mb-2">Error</h3>
+                <p x-text="error"></p>
+            </div>
+        </div>
+
+        <!-- Main content with sidebar -->
+        <div x-show="!loading && !error && course" class="flex-1 flex overflow-hidden" x-cloak>
+            <!-- Sidebar with transition -->
+            <div :class="{
+                    'w-80': !sidebarHidden,
+                    'w-0': sidebarHidden
+                 }" 
+                 class="bg-white shadow-md flex flex-col h-full border-r transition-all duration-300 ease-in-out overflow-hidden">
+                <!-- Return to main page link -->
+                <div class="p-3 border-b bg-gray-50">
+                    <a href="/" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <span>Return to Dashboard</span>
+                    </a>
+                </div>
+
+                <!-- Sidebar tabs -->
+                <div class="flex border-b">
+                    <button @click="sidebarTab = 'contents'" :class="{'active': sidebarTab === 'contents'}"
+                        class="sidebar-tab flex-1 py-3 text-center font-medium text-gray-700 border-b-2 border-transparent">
+                        Course Contents
+                    </button>
+                    <button @click="sidebarTab = 'courses'" :class="{'active': sidebarTab === 'courses'}"
+                        class="sidebar-tab flex-1 py-3 text-center font-medium text-gray-700 border-b-2 border-transparent">
+                        Browse Courses
+                    </button>
+                </div>
+
+                <!-- Course contents tab -->
+                <div x-show="sidebarTab === 'contents'" class="flex-1 overflow-y-auto sidebar-scroll">
+                    <template x-for="section in getSortedSections()" :key="section._id">
+                        <div class="border-b border-gray-200">
+                            <!-- Section header -->
+                            <div @click="toggleSection(section._id)"
+                                class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-medium text-gray-900"
+                                        x-text="section.title || section.name || 'Untitled Section'"></h4>
+                                    <div>
+                                        <i :class="isSectionOpen(section._id) ? 'fa-chevron-up' : 'fa-chevron-down'"
+                                            class="fas text-gray-500 text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section content (lessons) -->
+                            <div x-show="isSectionOpen(section._id)" class="bg-gray-50">
+                                <!-- Loading state for lessons -->
+                                <div x-show="sectionsLoading[section._id]" class="px-6 py-2 text-xs">
+                                    <div
+                                        class="inline-block animate-spin rounded-full h-3 w-3 border-2 border-blue-600 border-t-transparent mr-2">
+                                    </div>
+                                    <span class="text-gray-600">Loading...</span>
+                                </div>
+
+                                <!-- Lessons list when loaded -->
+                                <ul
+                                    x-show="!sectionsLoading[section._id] && sectionLessons[section._id] && sectionLessons[section._id].length > 0">
+                                    <template x-for="(lesson, lessonIndex) in getSortedLessons(section)"
+                                        :key="lesson._id || lessonIndex">
+                                        <li @click="selectLesson(lesson)"
+                                            :class="{'bg-blue-50 border-l-4 border-blue-500': isLessonSelected(lesson), 'border-l-4 border-transparent': !isLessonSelected(lesson)}"
+                                            class="px-6 py-2 text-sm hover:bg-blue-50 transition-colors cursor-pointer">
+                                            <div class="flex items-center">
+                                                <div
+                                                    class="w-5 h-5 rounded-full bg-gray-200 flex-shrink-0 mr-3 flex items-center justify-center text-xs text-gray-700">
+                                                    <i class="fas fa-play-circle"
+                                                        :class="{'text-blue-600': isLessonSelected(lesson), 'text-gray-400': !isLessonSelected(lesson)}"></i>
+                                                </div>
+                                                <span class="truncate"
+                                                    x-text="lesson.title || lesson.name || `Lesson ${lessonIndex + 1}`"></span>
+                                            </div>
+                                        </li>
+                                    </template>
+                                </ul>
+
+                                <!-- Empty lessons state -->
+                                <div x-show="!sectionsLoading[section._id] && (!sectionLessons[section._id] || sectionLessons[section._id].length === 0)"
+                                    class="px-6 py-2 text-xs text-gray-500">
+                                    No lessons available
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Browse courses tab -->
+                <div x-show="sidebarTab === 'courses'" class="flex-1 overflow-y-auto sidebar-scroll">
+                    <!-- Roadmaps loading -->
+                    <div x-show="loadingRoadmaps" class="p-4 text-center text-sm text-gray-500">
+                        <div
+                            class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent mr-2">
+                        </div>
+                        <span>Loading roadmaps...</span>
+                    </div>
+
+                    <!-- Roadmaps error -->
+                    <div x-show="roadmapsError" class="p-4 text-sm text-red-600">
+                        <p x-text="roadmapsError"></p>
+                    </div>
+
+                    <!-- Roadmaps list -->
+                    <div x-show="!loadingRoadmaps && !roadmapsError">
+                        <template x-for="roadmap in roadmaps" :key="roadmap._id">
+                            <div class="border-b">
+                                <!-- Roadmap header -->
+                                <div @click="toggleRoadmap(roadmap._id)"
+                                    class="px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+                                    <div class="flex items-center justify-between">
+                                        <h4 class="font-medium text-gray-900" x-text="roadmap.title"></h4>
+                                        <div>
+                                            <i :class="isRoadmapOpen(roadmap._id) ? 'fa-chevron-up' : 'fa-chevron-down'"
+                                                class="fas text-gray-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1" x-text="roadmap.shortDescription"></p>
+                                </div>
+
+                                <!-- Roadmap courses -->
+                                <div x-show="isRoadmapOpen(roadmap._id)">
+                                    <template x-for="term in roadmap.terms" :key="term._id">
+                                        <!-- Term courses list -->
+                                        <ul x-show="term.courses && term.courses.length > 0">
+                                            <template x-for="termCourse in term.courses" :key="termCourse._id">
+                                                <li :class="{'bg-blue-50': course && termCourse._id === course._id}"
+                                                    class="px-6 py-2 hover:bg-gray-50 transition-colors">
+                                                    <a :href="`/course/${termCourse.slug}`" class="block">
+                                                        <div class="flex items-center">
+                                                            <div
+                                                                class="w-8 h-8 rounded bg-gray-200 flex-shrink-0 mr-3 flex items-center justify-center overflow-hidden">
+                                                                <img x-show="termCourse.thumbnail"
+                                                                    :src="termCourse.thumbnail"
+                                                                    class="w-full h-full object-cover" alt="Course" />
+                                                                <i x-show="!termCourse.thumbnail"
+                                                                    class="fas fa-book text-gray-400"></i>
+                                                            </div>
+                                                            <div class="flex-1 min-w-0">
+                                                                <p class="text-sm font-medium text-gray-900 truncate"
+                                                                    x-text="termCourse.title"></p>
+                                                                <p class="text-xs text-gray-500 truncate"
+                                                                    x-text="termCourse.description || 'No description'">
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                            </template>
+                                        </ul>
+
+                                        <!-- Empty term courses state -->
+                                        <div x-show="!term.courses || term.courses.length === 0"
+                                            class="px-6 py-2 text-xs text-gray-500">
+                                            No courses available in this term
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main content area -->
+            <div class="flex-1 overflow-y-auto p-6 bg-white transition-all duration-300 ease-in-out"
+                 :class="{'ml-4': !sidebarHidden}">
+                <!-- No lesson selected state -->
+                <div x-show="!selectedLesson" class="h-full flex flex-col items-center justify-center text-gray-500">
+                    <i class="fas fa-book-open text-5xl mb-4"></i>
+                    <h3 class="text-xl font-medium mb-2">Select a lesson to begin</h3>
+                    <p class="text-sm">Choose a lesson from the sidebar to view its content</p>
+                </div>
+
+                <!-- Lesson content when selected -->
+                <div x-show="selectedLesson" class="max-w-7xl mx-auto">
+                    <h1 class="text-2xl font-bold mb-4" x-text="selectedLesson?.title || selectedLesson?.name"></h1>
+
+                    <div class="text-sm text-gray-500 mb-6">
+                        <span x-show="selectedLesson?.duration">
+                            <i class="far fa-clock mr-1"></i>
+                        </span>
+                    </div>
+
+                    <!-- Replace the two-column layout div -->
+                    <div class="flex gap-6">
+                        <!-- Left column: Video -->
+                        <div x-show="videoSource" 
+                             :style="`width: ${videoWidth}px`"
+                             class="flex-shrink-0">
+                            <div class="sticky top-4">
+                                <div class="bg-white rounded-lg shadow-lg">
+                                    <!-- Video header -->
+                                    <div class="p-3 bg-gray-50 rounded-t-lg flex justify-between items-center border-b">
+                                        <h3 class="text-lg font-semibold">Video Content</h3>
+                                        <div class="flex gap-2">
+                                            <!-- Width controls -->
+                                            <button @click="videoWidth = Math.max(300, videoWidth - 50)" 
+                                                    class="text-gray-500 hover:text-gray-700 px-1"
+                                                    title="Decrease width">
+                                                <i class="fas fa-compress-alt"></i>
+                                            </button>
+                                            <button @click="videoWidth = Math.min(800, videoWidth + 50)" 
+                                                    class="text-gray-500 hover:text-gray-700 px-1"
+                                                    title="Increase width">
+                                                <i class="fas fa-expand-alt"></i>
+                                            </button>
+                                            <button @click="minimizeVideo = !minimizeVideo" 
+                                                    class="text-gray-500 hover:text-gray-700 px-1"
+                                                    :title="minimizeVideo ? 'Expand' : 'Minimize'">
+                                                <i :class="minimizeVideo ? 'fa-expand' : 'fa-compress'" class="fas"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- Video content -->
+                                    <div :class="{'hidden': minimizeVideo}">
+                                        <div class="aspect-w-16 aspect-h-9">
+                                            <video x-bind:src="videoSource" 
+                                                   controls 
+                                                   class="rounded-b-lg w-full">
+                                            </video>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resize handle -->
+                        <div x-show="videoSource" 
+                             class="w-2 hover:bg-blue-500 cursor-ew-resize transition-colors flex-shrink-0"
+                             @mousedown.prevent="startResize($event)">
+                            <div class="h-full w-full hover:bg-blue-500/50"></div>
+                        </div>
+
+                        <!-- Right column: Content -->
+                        <div class="flex-1 min-w-0">
+                            <!-- Render HTML content safely -->
+                            <div class="lesson-content prose prose-blue max-w-none" x-html="selectedLesson?.content || ''">
+                            </div>
+
+                            <!-- Navigation buttons -->
+                            <div class="mt-12 border-t pt-6 flex justify-between">
+                                <button @click="navigateToPreviousLesson()" x-show="hasPreviousLesson()"
+                                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded flex items-center">
+                                    <i class="fas fa-arrow-left mr-2"></i> Previous Lesson
+                                </button>
+                                <div></div> <!-- Spacer -->
+                                <button @click="navigateToNextLesson()" x-show="hasNextLesson()"
+                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center">
+                                    Next Lesson <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/course-detail.js"></script>
+</body>
+
+</html>
