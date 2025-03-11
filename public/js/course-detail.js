@@ -1,5 +1,6 @@
-function courseDetailApp() {
-    return {
+// Make sure the function is defined before Alpine loads
+document.addEventListener('alpine:init', () => {
+    Alpine.data('courseDetailApp', () => ({
         course: null,
         loading: true,
         error: null,
@@ -23,11 +24,13 @@ function courseDetailApp() {
 
         videoSource: null,
         minimizeVideo: false,
-        sidebarHidden: false,
+        sidebarHidden: localStorage.getItem('sidebarHidden') === 'true', // Get saved state
+        videoOnLeft: localStorage.getItem('videoOnLeft') === 'true' || true, // Default to true if not set
         videoWidth: 400, // Default video width in pixels
         isResizing: false,
         startX: 0,
-        startWidth: 0,
+        startContentWidth: 0, // Add this to track initial width
+        contentWidth: localStorage.getItem('contentWidth') || 50, // Default to 50%
 
         init() {
             // Extract course slug from URL  
@@ -56,14 +59,20 @@ function courseDetailApp() {
                 if (!this.isResizing) return;
                 e.preventDefault();
                 
-                // Calculate the new width based on mouse movement
+                const container = document.querySelector('.content-container');
+                if (!container) return;
+
+                const containerWidth = container.offsetWidth;
                 const diff = e.clientX - this.startX;
-                const newWidth = Math.min(Math.max(300, this.startWidth - diff), 800);
-                this.videoWidth = newWidth;
+                const percentageDiff = (diff / containerWidth) * 100;
+                const newWidth = this.startContentWidth - percentageDiff;
+                
+                // Limit between 40% and 60%
+                this.contentWidth = Math.min(Math.max(40, newWidth), 60);
+                localStorage.setItem('contentWidth', this.contentWidth);
             });
 
             window.addEventListener('mouseup', () => {
-                if (!this.isResizing) return;
                 this.isResizing = false;
                 document.body.style.cursor = 'default';
             });
@@ -73,6 +82,16 @@ function courseDetailApp() {
                 if (this.isResizing) {
                     e.preventDefault();
                 }
+            });
+
+            // Save sidebar state whenever it changes
+            this.$watch('sidebarHidden', (value) => {
+                localStorage.setItem('sidebarHidden', value);
+            });
+
+            // Save video position whenever it changes
+            this.$watch('videoOnLeft', (value) => {
+                localStorage.setItem('videoOnLeft', value);
             });
         },
 
@@ -347,7 +366,7 @@ function courseDetailApp() {
 
             console.log(`Selecting lesson: ${lesson.title || lesson.name}`);
             
-            // Reset video source and scroll state when changing lessons
+            // Reset video source
             this.videoSource = null;
             
             // Process content and extract video if available
@@ -355,6 +374,7 @@ function courseDetailApp() {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = lesson.content;
                 
+                // Extract video
                 const videoElements = tempDiv.getElementsByTagName('video');
                 if (videoElements.length > 0) {
                     Array.from(videoElements).forEach(videoElement => {
@@ -367,15 +387,11 @@ function courseDetailApp() {
                                 this.videoSource = sourceElement.getAttribute('src');
                             }
                         }
-                        const videoContainer = videoElement.closest('.video-container, .aspect-w-16, [class*="aspect-"]');
-                        if (videoContainer) {
-                            videoContainer.remove();
-                        } else {
-                            videoElement.remove();
-                        }
+                        videoElement.remove();
                     });
                 }
                 
+                // Keep the original content
                 lesson = {
                     ...lesson,
                     content: tempDiv.innerHTML
@@ -444,14 +460,18 @@ function courseDetailApp() {
         },
 
         startResize(e) {
-            if (!this.videoSource) return;
             this.isResizing = true;
             this.startX = e.clientX;
-            this.startWidth = this.videoWidth;
+            this.startContentWidth = this.contentWidth;
             document.body.style.cursor = 'ew-resize';
         },
-    };
-}
+
+        // Add new method to toggle video position
+        toggleVideoPosition() {
+            this.videoOnLeft = !this.videoOnLeft;
+        }
+    }));
+});
 
 function extractVideoSrc(htmlContent) {
     if (!htmlContent || typeof htmlContent !== 'string') {
@@ -479,4 +499,16 @@ function extractVideoSrc(htmlContent) {
 
     console.warn('No video source found in the provided HTML content');
     return null;
+}
+
+function estimateReadingTime(text) {
+    // Average reading speed (words per minute)
+    const wordsPerMinute = 150;
+    // Average word length in characters
+    const avgWordLength = 5;
+    
+    // Calculate approximate duration in seconds
+    const words = text.length / avgWordLength;
+    const minutes = words / wordsPerMinute;
+    return Math.max(2, Math.round(minutes * 60));
 } 

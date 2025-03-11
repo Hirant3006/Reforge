@@ -7,7 +7,9 @@
     <title>Course Detail</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js -->
+    <!-- Add this before Alpine.js -->
+    <script src="/js/course-detail.js"></script>
+    <!-- Move Alpine.js after our script -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
@@ -116,8 +118,8 @@
     </style>
 </head>
 
-<body class="bg-gray-100 h-screen flex flex-col">
-    <div x-data="courseDetailApp()" x-init="init()" class="flex flex-col h-full">
+<body class="bg-gray-100 h-screen flex flex-col" x-data="courseDetailApp()" x-init="init()" x-cloak>
+    <div class="flex flex-col h-full">
         <!-- Header -->
         <header class="bg-white shadow z-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -150,7 +152,7 @@
         </div>
 
         <!-- Main content with sidebar -->
-        <div x-show="!loading && !error && course" class="flex-1 flex overflow-hidden" x-cloak>
+        <div x-show="!loading && !error && course" class="flex-1 flex overflow-hidden">
             <!-- Sidebar with transition -->
             <div :class="{
                     'w-80': !sidebarHidden,
@@ -332,35 +334,22 @@
                     </div>
 
                     <!-- Replace the two-column layout div -->
-                    <div class="flex gap-6">
-                        <!-- Left column: Video -->
+                    <div class="flex gap-0 relative content-container">
+                        <!-- Video column (now on left) -->
                         <div x-show="videoSource" 
-                             :style="`width: ${videoWidth}px`"
-                             class="flex-shrink-0">
-                            <div class="sticky top-4">
+                             :style="`width: ${100 - contentWidth}%`"
+                             class="transition-width duration-75">
+                            <div class="sticky top-4 pr-4">
                                 <div class="bg-white rounded-lg shadow-lg">
                                     <!-- Video header -->
                                     <div class="p-3 bg-gray-50 rounded-t-lg flex justify-between items-center border-b">
                                         <h3 class="text-lg font-semibold">Video Content</h3>
-                                        <div class="flex gap-2">
-                                            <!-- Width controls -->
-                                            <button @click="videoWidth = Math.max(300, videoWidth - 50)" 
-                                                    class="text-gray-500 hover:text-gray-700 px-1"
-                                                    title="Decrease width">
-                                                <i class="fas fa-compress-alt"></i>
-                                            </button>
-                                            <button @click="videoWidth = Math.min(800, videoWidth + 50)" 
-                                                    class="text-gray-500 hover:text-gray-700 px-1"
-                                                    title="Increase width">
-                                                <i class="fas fa-expand-alt"></i>
-                                            </button>
-                                            <button @click="minimizeVideo = !minimizeVideo" 
-                                                    class="text-gray-500 hover:text-gray-700 px-1"
-                                                    :title="minimizeVideo ? 'Expand' : 'Minimize'">
-                                                <i :class="minimizeVideo ? 'fa-expand' : 'fa-compress'" class="fas"></i>
-                                            </button>
-                                        </div>
+                                        <button @click="minimizeVideo = !minimizeVideo" 
+                                                class="text-gray-500 hover:text-gray-700 px-1">
+                                            <i :class="minimizeVideo ? 'fa-expand' : 'fa-compress'" class="fas"></i>
+                                        </button>
                                     </div>
+                                    
                                     <!-- Video content -->
                                     <div :class="{'hidden': minimizeVideo}">
                                         <div class="aspect-w-16 aspect-h-9">
@@ -374,30 +363,32 @@
                             </div>
                         </div>
 
-                        <!-- Resize handle -->
-                        <div x-show="videoSource" 
-                             class="w-2 hover:bg-blue-500 cursor-ew-resize transition-colors flex-shrink-0"
-                             @mousedown.prevent="startResize($event)">
-                            <div class="h-full w-full hover:bg-blue-500/50"></div>
+                        <!-- Resizer handle -->
+                        <div class="absolute top-0 bottom-0 w-4 cursor-ew-resize group"
+                             :style="`left: calc(${100 - contentWidth}% - 4px)`"
+                             @mousedown="startResize($event)">
+                            <div class="w-1 h-full mx-auto bg-gray-300 group-hover:bg-blue-500 transition-colors"></div>
                         </div>
 
-                        <!-- Right column: Content -->
-                        <div class="flex-1 min-w-0">
-                            <!-- Render HTML content safely -->
-                            <div class="lesson-content prose prose-blue max-w-none" x-html="selectedLesson?.content || ''">
-                            </div>
+                        <!-- Content column (now on right) -->
+                        <div :style="`width: ${contentWidth}%`" 
+                             class="transition-width duration-75 min-w-0">
+                            <div class="pl-4">
+                                <div class="lesson-content prose prose-blue max-w-none" x-html="selectedLesson?.content || ''">
+                                </div>
 
-                            <!-- Navigation buttons -->
-                            <div class="mt-12 border-t pt-6 flex justify-between">
-                                <button @click="navigateToPreviousLesson()" x-show="hasPreviousLesson()"
-                                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded flex items-center">
-                                    <i class="fas fa-arrow-left mr-2"></i> Previous Lesson
-                                </button>
-                                <div></div> <!-- Spacer -->
-                                <button @click="navigateToNextLesson()" x-show="hasNextLesson()"
-                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center">
-                                    Next Lesson <i class="fas fa-arrow-right ml-2"></i>
-                                </button>
+                                <!-- Navigation buttons -->
+                                <div class="mt-12 border-t pt-6 flex justify-between">
+                                    <button @click="navigateToPreviousLesson()" x-show="hasPreviousLesson()"
+                                        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded flex items-center">
+                                        <i class="fas fa-arrow-left mr-2"></i> Previous Lesson
+                                    </button>
+                                    <div></div>
+                                    <button @click="navigateToNextLesson()" x-show="hasNextLesson()"
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center">
+                                        Next Lesson <i class="fas fa-arrow-right ml-2"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -405,8 +396,6 @@
             </div>
         </div>
     </div>
-
-    <script src="/js/course-detail.js"></script>
 </body>
 
 </html>
