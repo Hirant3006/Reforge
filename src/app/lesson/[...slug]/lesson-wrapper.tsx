@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeftIcon, Bars3Icon, XMarkIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
 interface Lesson {
@@ -31,31 +31,6 @@ interface LessonWrapperProps {
 export default function LessonWrapper({ lesson, database, courseId, subcategoryId, lessonFile }: LessonWrapperProps) {
   const router = useRouter();
   const [sidebarVisible, setSidebarVisible] = useState(true);
-
-  // Find next lesson
-  const findNextLesson = () => {
-    const courseData = database.courses[courseId];
-    if (!courseData) return null;
-
-    const allLessons: { lesson: Lesson; subcategoryName: string }[] = [];
-    
-    // Flatten all lessons from all subcategories
-    Object.entries(courseData).forEach(([subcat, lessons]) => {
-      lessons.forEach(l => allLessons.push({ lesson: l, subcategoryName: subcat }));
-    });
-
-    // Find current lesson index
-    const currentIndex = allLessons.findIndex(item => item.lesson.f === lessonFile);
-    
-    // Return next lesson if exists
-    if (currentIndex !== -1 && currentIndex < allLessons.length - 1) {
-      return allLessons[currentIndex + 1];
-    }
-    
-    return null;
-  };
-
-  const nextLesson = findNextLesson();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -108,41 +83,6 @@ export default function LessonWrapper({ lesson, database, courseId, subcategoryI
                 </div>
               )}
             </div>
-
-            {/* Next Lesson CTA */}
-            {nextLesson && (
-              <div className="mt-8 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-indigo-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 text-sm text-indigo-600 font-medium mb-2">
-                      <span>Next Lesson</span>
-                      <ArrowRightIcon className="h-4 w-4" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      {nextLesson.lesson.t}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {nextLesson.subcategoryName}
-                    </p>
-                    <button
-                      onClick={() => {
-                        const nextUrl = `/lesson/${encodeURIComponent(courseId)}/${encodeURIComponent(nextLesson.subcategoryName)}/${nextLesson.lesson.f}`;
-                        router.push(nextUrl);
-                      }}
-                      className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-                    >
-                      Continue Learning
-                      <ArrowRightIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="hidden md:block ml-6">
-                    <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
-                      <ArrowRightIcon className="h-8 w-8 text-indigo-600" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Sidebar Navigation */}
