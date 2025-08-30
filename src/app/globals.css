@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Lesson content specific styles */
+.lesson-content {
+  line-height: 1.7;
+}
+
+.lesson-content h1,
+.lesson-content h2,
+.lesson-content h3,
+.lesson-content h4,
+.lesson-content h5,
+.lesson-content h6 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.lesson-content h2 {
+  font-size: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.lesson-content p {
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+.lesson-content ul,
+.lesson-content ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.lesson-content li {
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.lesson-content img {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.15);
+  margin: 2rem 0;
+  display: block;
+  cursor: default;
+  transition: transform 0.2s ease;
+}
+
+.lesson-content img:hover {
+  transform: scale(1.02);
+}
+
+.lesson-content .rf-lightbox-container img {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 2rem 0;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Handle UK Grid system from original content */
+.lesson-content .uk-grid {
+  display: block;
+  margin-bottom: 1.5rem;
+  border-left: none;
+  padding-left: 0;
+}
+
+.lesson-content .uk-width-expand {
+  display: block;
+  width: 100%;
+}
+
+.lesson-content .uk-width-auto {
+  display: none;
+}
+
+.lesson-content .inline-posts__content-block {
+  padding: 0;
+}
+
+/* Hide comment blocks from original content */
+.lesson-content .commentable_block {
+  display: none;
+}
+
+/* Enhanced image styling */
+.lesson-content .rf-lightbox-container {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.lesson-content .rf-lightbox-container img {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  margin: 0;
+  display: block;
+}
+
+/* Better spacing for content blocks */
+.lesson-content .uk-grid.inline-posts {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e2e8f0;
+  border-left: none;
+}
+
+.lesson-content .uk-grid.inline-posts:hover {
+  background: #f1f5f9;
+}
+
+.lesson-content strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Disable all links and clickable elements in lesson content */
+.lesson-content a,
+.lesson-content button,
+.lesson-content [role="button"],
+.lesson-content [onclick],
+.lesson-content .rf-lightbox-container {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* Keep images non-clickable but allow hover effects */
+.lesson-content img {
+  pointer-events: none;
+}
+
+/* Force full width for any image containers */
+.lesson-content div[style*="text-align"],
+.lesson-content div[style*="display: block"],
+.lesson-content .rf-lightbox-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Override any inline styles that might limit image width */
+.lesson-content img[style] {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Remove any left borders from all content elements */
+.lesson-content *,
+.lesson-content .uk-grid,
+.lesson-content .inline-posts,
+.lesson-content div {
+  border-left: none !important;
+}
