@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Detail</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Add this before Alpine.js -->
+    <script src="/js/course-detail.js"></script>
+    <!-- Move Alpine.js after our script -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* Custom scrollbar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        /* Lesson content styling */
+        .lesson-content h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-content h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .lesson-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .lesson-content ul,
+        .lesson-content ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .lesson-content ul {
+            list-style-type: disc;
+        }
+
+        .lesson-content ol {
+            list-style-type: decimal;
+        }
+
+        .lesson-content a {
+            color: #3182ce;
+            text-decoration: underline;
+        }
+
+        .lesson-content pre {
+            background-color: #f7fafc;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+        }
+
+        .lesson-content code {
+            background-color: #edf2f7;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+        }
+
+        .lesson-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 1rem 0;
+        }
+
+        .lesson-content blockquote {
+            border-left: 4px solid #a0aec0;
+            padding-left: 1rem;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+
+        /* Sidebar tabs styling */
+        .sidebar-tab.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 h-screen flex flex-col" x-data="courseDetailApp()" x-init="init()" x-cloak>
+    <div class="flex flex-col h-full">
+        <!-- Header -->
+        <header class="bg-white shadow z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center gap-4">
+                        <!-- Add sidebar toggle button -->
+                        <button @click="sidebarHidden = !sidebarHidden" 
+                                class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-xl font-bold text-gray-900" x-text="course ? course.title : 'Loading course...'"></h1>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Loading state -->
+        <div x-show="loading" class="flex-1 flex justify-center items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+        </div>
+
+        <!-- Error state -->
+        <div x-show="error" class="flex-1 flex justify-center items-center p-4 text-red-700">
+            <div class="bg-red-100 rounded-lg p-6 max-w-md">
+                <h3 class="text-lg font-medium mb-2">Error</h3>
+                <p x-text="error"></p>
+            </div>
+        </div>
+
+        <!-- Main content with sidebar -->
+        <div x-show="!loading && !error && course" class="flex-1 flex overflow-hidden">
+            <!-- Sidebar with transition -->
+            <div :class="{
+                    'w-80': !sidebarHidden,
+                    'w-0': sidebarHidden
+                 }" 
+                 class="bg-white shadow-md flex flex-col h-full border-r transition-all duration-300 ease-in-out overflow-hidden">
+                <!-- Return to main page link -->
+                <div class="p-3 border-b bg-gray-50">
+                    <a href="/" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <span>Return to Dashboard</span>
+                    </a>
+                </div>
+
+                <!-- Sidebar tabs -->
+                <div class="flex border-b">
+                    <button @click="sidebarTab = 'contents'" :class="{'active': sidebarTab === 'contents'}"
+                        class="sidebar-tab flex-1 py-3 text-center font-medium text-gray-700 border-b-2 border-transparent">
+                        Course Contents
+                    </button>
+                    <button @click="sidebarTab = 'courses'" :class="{'active': sidebarTab === 'courses'}"
+                        class="sidebar-tab flex-1 py-3 text-center font-medium text-gray-700 border-b-2 border-transparent">
+                        Browse Courses
+                    </button>
+                </div>
+
+                <!-- Course contents tab -->
+                <div x-show="sidebarTab === 'contents'" class="flex-1 overflow-y-auto sidebar-scroll">
+                    <template x-for="section in getSortedSections()" :key="section._id">
+                        <div class="border-b border-gray-200">
+                            <!-- Section header -->
+                            <div @click="toggleSection(section._id)"
+                                class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-medium text-gray-900"
+                                        x-text="section.title || section.name || 'Untitled Section'"></h4>
+                                    <div>
+                                        <i :class="isSectionOpen(section._id) ? 'fa-chevron-up' : 'fa-chevron-down'"
+                                            class="fas text-gray-500 text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section content (lessons) -->
+                            <div x-show="isSectionOpen(section._id)" class="bg-gray-50">
+                                <!-- Loading state for lessons -->
+                                <div x-show="sectionsLoading[section._id]" class="px-6 py-2 text-xs">
+                                    <div
+                                        class="inline-block animate-spin rounded-full h-3 w-3 border-2 border-blue-600 border-t-transparent mr-2">
+                                    </div>
+                                    <span class="text-gray-600">Loading...</span>
+                                </div>
+
+                                <!-- Lessons list when loaded -->
+                                <ul
+                                    x-show="!sectionsLoading[section._id] && sectionLessons[section._id] && sectionLessons[section._id].length > 0">
+                                    <template x-for="(lesson, lessonIndex) in getSortedLessons(section)"
+                                        :key="lesson._id || lessonIndex">
+                                        <li @click="selectLesson(lesson)"
+                                            :class="{'bg-blue-50 border-l-4 border-blue-500': isLessonSelected(lesson), 'border-l-4 border-transparent': !isLessonSelected(lesson)}"
+                                            class="px-6 py-2 text-sm hover:bg-blue-50 transition-colors cursor-pointer">
+                                            <div class="flex items-center">
+                                                <div
+                                                    class="w-5 h-5 rounded-full bg-gray-200 flex-shrink-0 mr-3 flex items-center justify-center text-xs text-gray-700">
+                                                    <i class="fas fa-play-circle"
+                                                        :class="{'text-blue-600': isLessonSelected(lesson), 'text-gray-400': !isLessonSelected(lesson)}"></i>
+                                                </div>
+                                                <span class="truncate"
+                                                    x-text="lesson.title || lesson.name || `Lesson ${lessonIndex + 1}`"></span>
+                                            </div>
+                                        </li>
+                                    </template>
+                                </ul>
+
+                                <!-- Empty lessons state -->
+                                <div x-show="!sectionsLoading[section._id] && (!sectionLessons[section._id] || sectionLessons[section._id].length === 0)"
+                                    class="px-6 py-2 text-xs text-gray-500">
+                                    No lessons available
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Browse courses tab -->
+                <div x-show="sidebarTab === 'courses'" class="flex-1 overflow-y-auto sidebar-scroll">
+                    <!-- Roadmaps loading -->
+                    <div x-show="loadingRoadmaps" class="p-4 text-center text-sm text-gray-500">
+                        <div
+                            class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent mr-2">
+                        </div>
+                        <span>Loading roadmaps...</span>
+                    </div>
+
+                    <!-- Roadmaps error -->
+                    <div x-show="roadmapsError" class="p-4 text-sm text-red-600">
+                        <p x-text="roadmapsError"></p>
+                    </div>
+
+                    <!-- Roadmaps list -->
+                    <div x-show="!loadingRoadmaps && !roadmapsError">
+                        <template x-for="roadmap in roadmaps" :key="roadmap._id">
+                            <div class="border-b">
+                                <!-- Roadmap header -->
+                                <div @click="toggleRoadmap(roadmap._id)"
+                                    class="px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+                                    <div class="flex items-center justify-between">
+                                        <h4 class="font-medium text-gray-900" x-text="roadmap.title"></h4>
+                                        <div>
+                                            <i :class="isRoadmapOpen(roadmap._id) ? 'fa-chevron-up' : 'fa-chevron-down'"
+                                                class="fas text-gray-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1" x-text="roadmap.shortDescription"></p>
+                                </div>
+
+                                <!-- Roadmap courses -->
+                                <div x-show="isRoadmapOpen(roadmap._id)">
+                                    <template x-for="term in roadmap.terms" :key="term._id">
+                                        <!-- Term courses list -->
+                                        <ul x-show="term.courses && term.courses.length > 0">
+                                            <template x-for="termCourse in term.courses" :key="termCourse._id">
+                                                <li :class="{'bg-blue-50': course && termCourse._id === course._id}"
+                                                    class="px-6 py-2 hover:bg-gray-50 transition-colors">
+                                                    <a :href="`/course/${termCourse.slug}`" class="block">
+                                                        <div class="flex items-center">
+                                                            <div
+                                                                class="w-8 h-8 rounded bg-gray-200 flex-shrink-0 mr-3 flex items-center justify-center overflow-hidden">
+                                                                <img x-show="termCourse.thumbnail"
+                                                                    :src="termCourse.thumbnail"
+                                                                    class="w-full h-full object-cover" alt="Course" />
+                                                                <i x-show="!termCourse.thumbnail"
+                                                                    class="fas fa-book text-gray-400"></i>
+                                                            </div>
+                                                            <div class="flex-1 min-w-0">
+                                                                <p class="text-sm font-medium text-gray-900 truncate"
+                                                                    x-text="termCourse.title"></p>
+                                                                <p class="text-xs text-gray-500 truncate"
+                                                                    x-text="termCourse.description || 'No description'">
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                            </template>
+                                        </ul>
+
+                                        <!-- Empty term courses state -->
+                                        <div x-show="!term.courses || term.courses.length === 0"
+                                            class="px-6 py-2 text-xs text-gray-500">
+                                            No courses available in this term
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main content area -->
+            <div class="flex-1 overflow-y-auto p-6 bg-white transition-all duration-300 ease-in-out"
+                 :class="{'ml-4': !sidebarHidden}">
+                <!-- No lesson selected state -->
+                <div x-show="!selectedLesson" class="h-full flex flex-col items-center justify-center text-gray-500">
+                    <i class="fas fa-book-open text-5xl mb-4"></i>
+                    <h3 class="text-xl font-medium mb-2">Select a lesson to begin</h3>
+                    <p class="text-sm">Choose a lesson from the sidebar to view its content</p>
+                </div>
+
+                <!-- Lesson content when selected -->
+                <div x-show="selectedLesson" class="max-w-7xl mx-auto">
+                    <h1 class="text-2xl font-bold mb-4" x-text="selectedLesson?.title || selectedLesson?.name"></h1>
+
+                    <div class="text-sm text-gray-500 mb-6">
+                        <span x-show="selectedLesson?.duration">
+                            <i class="far fa-clock mr-1"></i>
+                        </span>
+                    </div>
+
+                    <!-- Replace the two-column layout div -->
+                    <div class="flex gap-0 relative content-container">
+                        <!-- Video column (now on left) -->
+                        <div x-show="videoSource" 
+                             :style="`width: ${100 - contentWidth}%`"
+                             class="transition-width duration-75">
+                            <div class="sticky top-4 pr-4">
+                                <div class="bg-white rounded-lg shadow-lg">
+                                    <!-- Video header -->
+                                    <div class="p-3 bg-gray-50 rounded-t-lg flex justify-between items-center border-b">
+                                        <h3 class="text-lg font-semibold">Video Content</h3>
+                                        <button @click="minimizeVideo = !minimizeVideo" 
+                                                class="text-gray-500 hover:text-gray-700 px-1">
+                                            <i :class="minimizeVideo ? 'fa-expand' : 'fa-compress'" class="fas"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Video content -->
+                                    <div :class="{'hidden': minimizeVideo}">
+                                        <div class="aspect-w-16 aspect-h-9">
+                                            <video x-bind:src="videoSource" 
+                                                   controls 
+                                                   class="rounded-b-lg w-full">
+                                            </video>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resizer handle -->
+                        <div class="absolute top-0 bottom-0 w-4 cursor-ew-resize group"
+                             :style="`left: calc(${100 - contentWidth}% - 4px)`"
+                             @mousedown="startResize($event)">
+                            <div class="w-1 h-full mx-auto bg-gray-300 group-hover:bg-blue-500 transition-colors"></div>
+                        </div>
+
+                        <!-- Content column (now on right) -->
+                        <div :style="`width: ${contentWidth}%`" 
+                             class="transition-width duration-75 min-w-0">
+                            <div class="pl-4">
+                                <div class="lesson-content prose prose-blue max-w-none" x-html="selectedLesson?.content || ''">
+                                </div>
+
+                                <!-- Navigation buttons -->
+                                <div class="mt-12 border-t pt-6 flex justify-between">
+                                    <button @click="navigateToPreviousLesson()" x-show="hasPreviousLesson()"
+                                        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded flex items-center">
+                                        <i class="fas fa-arrow-left mr-2"></i> Previous Lesson
+                                    </button>
+                                    <div></div>
+                                    <button @click="navigateToNextLesson()" x-show="hasNextLesson()"
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center">
+                                        Next Lesson <i class="fas fa-arrow-right ml-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

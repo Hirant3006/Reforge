@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Reforge Learning Hub
+
+A Next.js-based AI learning hub that extracts course content from HTML files and displays them in a searchable, organized interface.
+
+## Features
+
+- **Content Extraction**: Extracts course content from HTML files and converts them to a compressed JSON database
+- **Course Browsing**: Browse courses by category and subcategory
+- **Lesson Viewing**: Full lesson content display with images and formatting
+- **Search**: Search through course content and lessons
+- **Responsive Design**: Works on desktop and mobile devices
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Content Extraction
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Extract course content from HTML files:
 
-## Learn More
+```bash
+# Extract all courses
+node extract_content.js
 
-To learn more about Next.js, take a look at the following resources:
+# Incremental extraction (only changed files)
+node extract_content.js --incremental
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Extract specific course
+node extract_content.js --course "AI Strategy"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+- `src/app/` - Next.js app directory with pages and components
+- `extract_content.js` - Content extraction script
+- `courses_database.json` - Generated course database
+- `courses/` - Source HTML course files
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Vercel Deployment
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Configure build settings:
+   - **Framework**: Next.js
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `.next`
+4. Deploy
+
+The app will automatically deploy on every push to the main branch.
+
+## Built With
+
+- [Next.js 15](https://nextjs.org/) - React framework
+- [TypeScript](https://www.typescriptlang.org/) - Type safety
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
+- [Heroicons](https://heroicons.com/) - Icons

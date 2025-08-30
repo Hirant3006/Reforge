@@ -1,13 +1,24 @@
 {
-  "name": "learning-hub",
+  "name": "reforge-learning-hub",
   "version": "0.1.0",
   "private": true,
+  "description": "AI Learning Hub with course content extraction and lesson display",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hirant3006/Reforge.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hirant3006/Reforge/issues"
+  },
+  "homepage": "https://github.com/Hirant3006/Reforge#readme",
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "next": "15.5.0",

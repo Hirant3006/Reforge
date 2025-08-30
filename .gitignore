@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# netlify
+.netlify
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
@@ -54,3 +57,6 @@ Thumbs.db
 
 # Ignore the duplicate course files in public (we only need the database)
 public/courses/
+
+# Legacy serverless files
+*dump/*
