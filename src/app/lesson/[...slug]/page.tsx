@@ -59,9 +59,10 @@ async function loadLessonData(courseId: string, subcategoryId: string, lessonFil
 export default async function TestLessonPage({ 
   params 
 }: { 
-  params: { slug: string[] } 
+  params: Promise<{ slug: string[] }> 
 }) {
-  const [courseId, subcategoryId, lessonFile] = params.slug.map(decodeURIComponent);
+  const { slug } = await params;
+  const [courseId, subcategoryId, lessonFile] = slug.map(decodeURIComponent);
   
   console.log('Loading lesson:', { courseId, subcategoryId, lessonFile });
   

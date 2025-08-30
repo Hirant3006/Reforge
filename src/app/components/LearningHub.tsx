@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { BookOpenIcon, PlayIcon } from '@heroicons/react/24/solid';
+import { BookOpenIcon } from '@heroicons/react/24/solid';
 
 // Types for our database structure
 interface Lesson {

@@ -130,12 +130,12 @@ export default function LessonWrapper({ lesson, database, courseId, subcategoryI
                 )}
                 
                 <div className="mt-6 pt-4 border-t">
-                  <a
-                    href="/"
+                  <button
+                    onClick={() => router.push('/')}
                     className="block w-full text-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
                   >
                     Back to Learning Hub
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

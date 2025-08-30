@@ -183,7 +183,7 @@ export default function LessonContentPage() {
                       <BookOpenIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Content Available</h3>
                       <p className="text-gray-600 mb-4">
-                        This lesson doesn't have extracted content yet.
+                        This lesson doesn&apos;t have extracted content yet.
                       </p>
                     </div>
                   )}

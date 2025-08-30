@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeftIcon, PlayIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { BookOpenIcon } from '@heroicons/react/24/solid';
 
 // Types
@@ -66,26 +66,6 @@ export default function CourseDetailPage() {
     );
   };
 
-  // Get HTML content for a lesson
-  const getHtmlContent = async (lesson: Lesson) => {
-    try {
-      const coursePath = encodeURIComponent(courseId);
-      const subcategoryPath = Object.keys(database?.courses[courseId] || {}).find(subcat => 
-        database?.courses[courseId][subcat].some(l => l.id === lesson.id)
-      );
-      
-      if (subcategoryPath) {
-        const response = await fetch(`/courses/${coursePath}/${encodeURIComponent(subcategoryPath)}/${lesson.f}`);
-        if (response.ok) {
-          return await response.text();
-        }
-      }
-      return null;
-    } catch (error) {
-      console.error('Failed to load HTML content:', error);
-      return null;
-    }
-  };
 
   // Navigate to lesson content page
   const openLessonContent = (lesson: Lesson) => {
@@ -120,7 +100,7 @@ export default function CourseDetailPage() {
         <div className="text-center">
           <BookOpenIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Course Not Found</h2>
-          <p className="text-gray-600 mb-4">The course "{courseId}" could not be found.</p>
+          <p className="text-gray-600 mb-4">The course &quot;{courseId}&quot; could not be found.</p>
           <button
             onClick={() => router.back()}
             className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
