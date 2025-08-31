@@ -35,27 +35,92 @@ export default function CourseDetailPage() {
   const courseId = decodeURIComponent(params.courseId as string);
   
   const [database, setDatabase] = useState<Database | null>(null);
+  const [coursesOrder, setCoursesOrder] = useState<any>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Load database on component mount
+  // Load database and course order on component mount
   useEffect(() => {
-    const loadDatabase = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch('/courses_database.json');
-        const data: Database = await response.json();
+        const [dbResponse, orderResponse] = await Promise.all([
+          fetch('/courses_database.json'),
+          fetch('/courses.json')
+        ]);
+        
+        const data: Database = await dbResponse.json();
         setDatabase(data);
+        
+        if (orderResponse.ok) {
+          const orderData = await orderResponse.json();
+          setCoursesOrder(orderData);
+        }
       } catch (error) {
-        console.error('Failed to load courses database:', error);
+        console.error('Failed to load data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadDatabase();
+    loadData();
   }, []);
 
+
+  // Normalize section names for matching (handle colon vs underscore differences)
+  const normalizeSection = (sectionName: string) => {
+    return sectionName.replace(/[_:]/g, '').replace(/\s+/g, ' ').trim();
+  };
+
+  // Get lesson order from courses.json
+  const getLessonOrder = (subcategoryName: string) => {
+    if (!coursesOrder) return null;
+    
+    const course = coursesOrder.find((c: any) => c.title === courseId);
+    if (!course) return null;
+    
+    const normalizedSubcat = normalizeSection(subcategoryName);
+    const section = course.sections.find((s: any) => 
+      normalizeSection(s.sectionTitle) === normalizedSubcat
+    );
+    if (!section) return null;
+    
+    const orderMap: {[title: string]: number} = {};
+    section.lessons.forEach((lesson: any, index: number) => {
+      orderMap[lesson.title] = index;
+    });
+    
+    return orderMap;
+  };
+
+  // Get section order from courses.json
+  const getSectionOrder = (subcategoryName: string) => {
+    if (!coursesOrder) return 999;
+    
+    const course = coursesOrder.find((c: any) => c.title === courseId);
+    if (!course) return 999;
+    
+    const normalizedSubcat = normalizeSection(subcategoryName);
+    const sectionIndex = course.sections.findIndex((s: any) => 
+      normalizeSection(s.sectionTitle) === normalizedSubcat
+    );
+    
+    return sectionIndex !== -1 ? sectionIndex : 999;
+  };
+
+  // Sort lessons based on courses.json order
+  const sortLessons = (lessons: Lesson[], subcategoryName: string) => {
+    const lessonOrder = getLessonOrder(subcategoryName);
+    if (!lessonOrder) {
+      return lessons; // Return as-is if no order found
+    }
+    
+    return lessons.sort((a, b) => {
+      const orderA = lessonOrder[a.t] ?? 999;
+      const orderB = lessonOrder[b.t] ?? 999;
+      return orderA - orderB;
+    });
+  };
 
   // Filter lessons based on search term
   const filterLessons = (lessons: Lesson[]) => {
@@ -116,6 +181,13 @@ export default function CourseDetailPage() {
   const courseData = database.courses[courseId];
   const totalLessons = Object.values(courseData).reduce((sum, lessons) => sum + lessons.length, 0);
 
+  // Sort categories based on courses.json order
+  const sortedCourseEntries = Object.entries(courseData).sort(([subcatA], [subcatB]) => {
+    const orderA = getSectionOrder(subcatA);
+    const orderB = getSectionOrder(subcatB);
+    return orderA - orderB;
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
@@ -161,8 +233,9 @@ export default function CourseDetailPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Lessons List */}
           <div className="lg:col-span-2 space-y-6">
-            {Object.entries(courseData).map(([subcategoryName, lessons]) => {
-              const filteredLessons = filterLessons(lessons);
+            {sortedCourseEntries.map(([subcategoryName, lessons]) => {
+              const sortedLessons = sortLessons(lessons, subcategoryName);
+              const filteredLessons = filterLessons(sortedLessons);
               if (filteredLessons.length === 0 && searchTerm) return null;
 
               return (
@@ -243,7 +316,7 @@ export default function CourseDetailPage() {
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-2">Categories</h4>
                   <div className="space-y-2">
-                    {Object.entries(courseData).map(([subcategory, lessons]) => (
+                    {sortedCourseEntries.map(([subcategory, lessons]) => (
                       <div key={subcategory} className="flex justify-between text-sm">
                         <span className="text-gray-600 truncate mr-2">{subcategory}</span>
                         <span className="text-gray-500 flex-shrink-0">{lessons.length}</span>
